@@ -62,12 +62,13 @@
         .mode-container i { transition: 0.3s; }
         .mode-container.active i { transform: rotate(180deg); }
 
-        /* Container Tombol Ilmiah yang bisa disembunyikan */
+        /* Kontainer Tombol Ilmiah yang bisa disembunyikan */
         #sci-keys { 
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-            margin-bottom: 12px; transition: all 0.3s ease;
+            margin-bottom: 12px; transition: 0.3s ease-in-out;
+            max-height: 500px; overflow: hidden;
         }
-        .hidden { display: none !important; }
+        #sci-keys.hidden { max-height: 0; margin-bottom: 0; opacity: 0; pointer-events: none; }
 
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 
@@ -152,7 +153,7 @@
     const histDiv = document.getElementById('history');
     const histList = document.getElementById('history-list');
 
-    // 1. Fungsi Toggle Ilmiah
+    // --- FUNGSI BARU UNTUK TOMBOL ILMIAH ---
     function toggleScientific() {
         const sciKeys = document.getElementById('sci-keys');
         const modeCont = document.querySelector('.mode-container');
@@ -160,7 +161,6 @@
         modeCont.classList.toggle('active');
     }
 
-    // 2. Fungsi Mode & Riwayat
     function toggleDarkMode() {
         document.body.classList.toggle('dark-mode');
         const icon = document.getElementById('theme-btn');
@@ -180,7 +180,7 @@
         histList.prepend(item);
     }
 
-    // 3. Logika Utama
+    // --- LOGIKA UTAMA ---
     function press(v) { currentInput += v; render(); }
     function clearAll() { currentInput = ""; histDiv.innerText = ""; render(); }
     function del() { currentInput = currentInput.slice(0, -1); render(); }
