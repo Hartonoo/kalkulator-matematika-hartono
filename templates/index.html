@@ -7,37 +7,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: 0.3s; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: 0.3s; }
         .dark-mode { background: #0f172a; }
-        
-        .calc { background: white; padding: 25px; border-radius: 35px; width: 100%; max-width: 360px; transition: 0.3s; position: relative; overflow: hidden; }
+        .calc { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); width: 100%; max-width: 360px; transition: 0.3s; }
         .dark-mode .calc { background: #1e293b; color: white; }
-
-        .header-tools { display: flex; justify-content: space-between; padding-bottom: 20px; color: #94a3b8; }
-        
-        /* Tampilan Layar agar tidak meluber */
-        .display { text-align: right; margin-bottom: 20px; padding: 10px; min-height: 120px; display: flex; flex-direction: column; justify-content: flex-end; }
-        #history-text { font-size: 0.9rem; color: #cbd5e1; margin-bottom: 5px; }
-        #main-val { 
-            font-size: 2.5rem; font-weight: 700; color: #1e293b; 
-            word-wrap: break-word; overflow-wrap: break-word; /* Mencegah meluber */
-            max-height: 100px; overflow-y: auto; 
-        }
-        .dark-mode #main-val { color: #f1f5f9; }
-
+        .header-tools { display: flex; justify-content: space-between; align-items: center; color: #94a3b8; margin-bottom: 20px; }
         .mode-text { text-align: center; font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-bottom: 15px; cursor: pointer; text-transform: uppercase; }
-
-        /* Panel Ilmiah yang bisa disembunyikan */
-        #sci-panel { display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
-        .grid-base { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        
-        button { border: none; padding: 15px 0; border-radius: 18px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f8fafc; color: #475569; }
+        .display { text-align: right; margin-bottom: 25px; padding: 10px; min-height: 100px; display: flex; flex-direction: column; justify-content: flex-end; }
+        #main-val { font-size: 2.5rem; font-weight: 700; color: #1e293b; word-wrap: break-word; }
+        .dark-mode #main-val { color: #f1f5f9; }
+        #sci-panel { display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        button { border: none; padding: 18px 0; border-radius: 18px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f8fafc; color: #475569; }
         .dark-mode button { background: #334155; color: #cbd5e1; }
         .btn-sci { color: #6366f1; background: #f1f5f9; font-size: 0.9rem; }
         .btn-op { background: #10b981; color: white; }
         .btn-ac { color: #ef4444; background: #fef2f2; }
         .btn-eq { background: #3b82f6 !important; color: white !important; grid-column: span 2; }
-        
         .icon { cursor: pointer; font-size: 1.2rem; }
     </style>
 </head>
@@ -50,12 +36,10 @@
     </div>
 
     <div class="mode-text" onclick="toggleSci()">
-        <span id="mode-label">Sederhana</span>
-        <div id="arrow-icon">⌵</div>
+        <span id="mode-label">Sederhana</span> ⌵
     </div>
 
     <div class="display">
-        <div id="history-text"></div>
         <div id="main-val">0</div>
     </div>
 
@@ -66,11 +50,11 @@
         <button class="btn-sci" onclick="press('sqrt(')">√</button>
         <button class="btn-sci" onclick="press('log10(')">log</button>
         <button class="btn-sci" onclick="press('^')">xʸ</button>
-        <button class="btn-sci" onclick="press('PI')">π</button>
-        <button class="btn-sci" onclick="press('E')">e</button>
+        <button class="btn-sci" onclick="press('pi')">π</button>
+        <button class="btn-sci" onclick="press('e')">e</button>
     </div>
 
-    <div class="grid-base">
+    <div class="grid">
         <button class="btn-ac" onclick="clearAll()">AC</button>
         <button onclick="del()">⌫</button>
         <button onclick="press('%')">%</button>
@@ -89,26 +73,17 @@
 <script>
     let input = "";
     const display = document.getElementById('main-val');
-    const hist = document.getElementById('history-text');
 
-    function press(v) {
-        input += v;
-        render();
-    }
-
-    function render() {
-        display.innerText = input || "0";
-    }
-
-    function clearAll() { input = ""; hist.innerText = ""; render(); }
+    function press(v) { input += v; render(); }
+    function clearAll() { input = ""; render(); }
     function del() { input = input.slice(0, -1); render(); }
+    function render() { display.innerText = input || "0"; }
 
     function calculate() {
         try {
-            // Menggunakan math.js untuk hitungan otomatis sin/cos/dll
-            let result = math.evaluate(input);
-            hist.innerText = input + " =";
-            input = math.format(result, {precision: 10}).toString();
+            // Menghitung otomatis dengan Math.js
+            let res = math.evaluate(input);
+            input = math.format(res, {precision: 10}).toString();
             render();
         } catch (e) {
             display.innerText = "Error";
@@ -119,16 +94,9 @@
     function toggleSci() {
         const panel = document.getElementById('sci-panel');
         const label = document.getElementById('mode-label');
-        const arrow = document.getElementById('arrow-icon');
-        if (panel.style.display === "grid") {
-            panel.style.display = "none";
-            label.innerText = "Sederhana";
-            arrow.innerText = "⌵";
-        } else {
-            panel.style.display = "grid";
-            label.innerText = "Ilmiah";
-            arrow.innerText = "⌃";
-        }
+        const isHidden = panel.style.display === "none" || panel.style.display === "";
+        panel.style.display = isHidden ? "grid" : "none";
+        label.innerText = isHidden ? "Ilmiah" : "Sederhana";
     }
 
     function toggleTheme() {
