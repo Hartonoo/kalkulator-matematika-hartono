@@ -3,56 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Hartono</title>
+    <title>Kalkulator Ilmiah Hartono</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .calc { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); width: 320px; }
-        .display { text-align: right; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 15px; min-height: 100px; display: flex; flex-direction: column; justify-content: flex-end; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .calc { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); width: 100%; max-width: 360px; }
+        .display { text-align: right; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 15px; min-height: 120px; display: flex; flex-direction: column; justify-content: flex-end; }
         #history { font-size: 0.9rem; color: #94a3b8; min-height: 1.2rem; margin-bottom: 5px; }
-        #main-val { font-size: 2.5rem; font-weight: bold; color: #1e293b; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        button { border: none; padding: 18px 0; border-radius: 16px; font-size: 1.2rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f1f5f9; color: #475569; width: 100%; }
-        button:active { transform: scale(0.92); background: #e2e8f0; }
-        .btn-op { background: #ecfdf5; color: #10b981; }
+        #main-val { font-size: 2.2rem; font-weight: bold; color: #1e293b; overflow-wrap: break-word; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        button { border: none; padding: 15px 0; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f1f5f9; color: #475569; }
+        button:active { transform: scale(0.95); }
+        /* Tombol Fungsi Ilmiah */
+        .btn-sci { color: #6366f1; font-size: 0.9rem; background: #eef2ff; }
+        /* Tombol Operator */
+        .btn-op { background: #059669; color: white; }
+        .btn-op-light { background: #ecfdf5; color: #10b981; }
         .btn-eq { background: #3b82f6 !important; color: white !important; grid-column: span 2; }
         .btn-ac { background: #fef2f2; color: #ef4444; }
     </style>
 </head>
 <body>
+
 <div class="calc">
     <div class="display">
         <div id="history">{{ a1 }} {{ ops }} {{ a2 }}</div>
         <div id="main-val">{{ hasil if hasil != "" else (a1 if a1 != "" else "0") }}</div>
     </div>
+
     <form method="POST">
         <input type="hidden" name="a1" id="h1" value="{{ a1 }}">
         <input type="hidden" name="a2" id="h2" value="{{ a2 }}">
         <input type="hidden" name="ops" id="h_op" value="{{ ops }}">
+
         <div class="grid">
+            <button type="button" class="btn-sci" onclick="press('sin(')">sin</button>
+            <button type="button" class="btn-sci" onclick="press('cos(')">cos</button>
+            <button type="button" class="btn-sci" onclick="press('tan(')">tan</button>
+            <button type="button" class="btn-sci" onclick="press('sqrt(')">√</button>
+            
+            <button type="button" class="btn-sci" onclick="press('log(')">log</button>
+            <button type="button" class="btn-sci" onclick="press('**')">xʸ</button>
+            <button type="button" class="btn-sci" onclick="press('3.14159')">π</button>
+            <button type="button" class="btn-sci" onclick="press('2.71828')">e</button>
+
             <button type="button" class="btn-ac" onclick="window.location.href='/'">AC</button>
+            <button type="button" class="btn-op-light" onclick="press('DEL')">⌫</button>
+            <button type="button" class="btn-op-light" onclick="setOp('%')">%</button>
+            <button type="button" class="btn-op" onclick="setOp('/')">÷</button>
+            
             <button type="button" onclick="press('7')">7</button>
             <button type="button" onclick="press('8')">8</button>
-            <button type="button" class="btn-op" onclick="setOp('/')">÷</button>
+            <button type="button" onclick="press('9')">9</button>
+            <button type="button" class="btn-op" onclick="setOp('*')">×</button>
+            
             <button type="button" onclick="press('4')">4</button>
             <button type="button" onclick="press('5')">5</button>
             <button type="button" onclick="press('6')">6</button>
-            <button type="button" class="btn-op" onclick="setOp('*')">×</button>
+            <button type="button" class="btn-op" onclick="setOp('-')">-</button>
+            
             <button type="button" onclick="press('1')">1</button>
             <button type="button" onclick="press('2')">2</button>
             <button type="button" onclick="press('3')">3</button>
-            <button type="button" class="btn-op" onclick="setOp('-')">-</button>
+            <button type="button" class="btn-op" onclick="setOp('+')">+</button>
+            
             <button type="button" onclick="press('0')">0</button>
             <button type="button" onclick="press('.')">.</button>
             <button type="submit" class="btn-eq">=</button>
-            <button type="button" class="btn-op" onclick="setOp('+')">+</button>
         </div>
     </form>
 </div>
+
 <script>
     let cur = "";
-    function press(n) { cur += n; document.getElementById('main-val').innerText = cur; if (!document.getElementById('h_op').value) { document.getElementById('h1').value = cur; } else { document.getElementById('h2').value = cur; } }
-    function setOp(op) { document.getElementById('h_op').value = op; document.getElementById('history').innerText = document.getElementById('h1').value + " " + op; cur = ""; }
+    function press(val) {
+        if(val === 'DEL') { cur = cur.slice(0, -1); }
+        else { cur += val; }
+        document.getElementById('main-val').innerText = cur || "0";
+        if (!document.getElementById('h_op').value) { document.getElementById('h1').value = cur; }
+        else { document.getElementById('h2').value = cur; }
+    }
+    function setOp(op) {
+        document.getElementById('h_op').value = op;
+        document.getElementById('history').innerText = document.getElementById('h1').value + " " + op;
+        cur = "";
+    }
 </script>
 </body>
 </html>
