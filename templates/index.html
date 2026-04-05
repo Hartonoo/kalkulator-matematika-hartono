@@ -8,142 +8,64 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        :root {
-            --bg-body: #f1f5f9;
-            --bg-calc: white;
-            --text-main: #1e293b;
-            --text-muted: #94a3b8;
-            --bg-btn: #f8fafc;
-        }
+        :root { --bg-body: #f1f5f9; --bg-calc: white; --text-main: #1e293b; --text-muted: #94a3b8; --bg-btn: #f8fafc; }
+        .dark-mode { --bg-body: #0f172a; --bg-calc: #1e293b; --text-main: #f1f5f9; --text-muted: #64748b; --bg-btn: #334155; }
 
-        .dark-mode {
-            --bg-body: #0f172a;
-            --bg-calc: #1e293b;
-            --text-main: #f1f5f9;
-            --text-muted: #64748b;
-            --bg-btn: #334155;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-body); display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: 0.3s; }
+        .calc { background: var(--bg-calc); padding: 20px; border-radius: 40px; width: 100%; max-width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.1); position: relative; transition: 0.3s; }
 
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: var(--bg-body); 
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; transition: 0.3s;
-        }
-        
-        .calc { 
-            background: var(--bg-calc); padding: 20px; border-radius: 40px; 
-            width: 100%; max-width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.1); 
-            position: relative; transition: 0.3s;
-        }
-
-        .header-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px; color: var(--text-muted); font-size: 1.2rem;
-        }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px; color: var(--text-muted); font-size: 1.2rem; }
         .header-bar i { cursor: pointer; }
 
-        .display { 
-            text-align: right; padding: 20px; min-height: 160px; 
-            display: flex; flex-direction: column; justify-content: flex-end;
-            word-wrap: break-word;
-        }
-
+        .display { text-align: right; padding: 20px; min-height: 160px; display: flex; flex-direction: column; justify-content: flex-end; }
         #history { font-size: 1rem; color: var(--text-muted); min-height: 1.5rem; margin-bottom: 5px; }
-        #result { font-size: 3.2rem; font-weight: 700; color: var(--text-main); line-height: 1.1; }
+        #result { font-size: 3.2rem; font-weight: 700; color: var(--text-main); line-height: 1.1; transition: font-size 0.2s; }
 
-        /* Label Ilmiah sebagai Tombol Aktif */
-        .mode-container { 
-            text-align: center; color: var(--text-muted); 
-            margin-bottom: 15px; cursor: pointer; user-select: none;
-        }
+        .mode-container { text-align: center; color: var(--text-muted); margin-bottom: 15px; cursor: pointer; user-select: none; }
         .mode-container span { font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; display: block; }
-        .mode-container i { transition: 0.3s; }
-        .mode-container.active i { transform: rotate(180deg); }
-
-        /* Kontainer Tombol Ilmiah yang bisa disembunyikan */
+        
+        /* TRANSISI LEMBUT DISINI */
         #sci-keys { 
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-            margin-bottom: 12px; transition: 0.3s ease-in-out;
-            max-height: 500px; overflow: hidden;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 250px; opacity: 1; margin-bottom: 12px;
         }
-        #sci-keys.hidden { max-height: 0; margin-bottom: 0; opacity: 0; pointer-events: none; }
+        #sci-keys.hidden { max-height: 0; margin-bottom: 0; opacity: 0; transform: scaleY(0.95); pointer-events: none; }
+
+        .mode-container i { transition: transform 0.5s ease; }
+        .mode-container.active i { transform: rotate(180deg); }
 
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-
-        button { 
-            border: none; padding: 18px 0; border-radius: 20px; 
-            font-size: 1.1rem; font-weight: 600; cursor: pointer; 
-            background: var(--bg-btn); color: var(--text-main); transition: 0.2s;
-        }
-
+        button { border: none; padding: 18px 0; border-radius: 20px; font-size: 1.1rem; font-weight: 600; cursor: pointer; background: var(--bg-btn); color: var(--text-main); transition: 0.2s; }
         .btn-sci { color: #6366f1; background: #eef2ff; }
         .btn-op { background: #10b981; color: white; }
         .btn-ac { color: #ef4444; background: #fff1f2; }
         .btn-eq { background: #3b82f6; color: white; grid-column: span 2; }
-        
         button:active { transform: scale(0.95); }
 
-        #history-modal {
-            display: none; position: absolute; top: 60px; right: 20px;
-            background: var(--bg-calc); border: 1px solid var(--text-muted);
-            padding: 15px; border-radius: 15px; z-index: 100; width: 220px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2); color: var(--text-main);
-        }
+        #history-modal { display: none; position: absolute; top: 60px; right: 20px; background: var(--bg-calc); border: 1px solid var(--text-muted); padding: 15px; border-radius: 15px; z-index: 100; width: 220px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); color: var(--text-main); }
     </style>
 </head>
 <body>
 
 <div class="calc">
-    <div id="history-modal">
-        <p style="font-size: 0.8rem; margin-bottom: 8px; border-bottom: 1px solid; padding-bottom: 4px;">Riwayat:</p>
-        <div id="history-list" style="font-size: 0.75rem; max-height: 150px; overflow-y: auto;">Belum ada data.</div>
-    </div>
-
+    <div id="history-modal"><p style="font-size: 0.8rem; margin-bottom: 8px; border-bottom: 1px solid; padding-bottom: 4px;">Riwayat:</p><div id="history-list" style="font-size: 0.75rem; max-height: 150px; overflow-y: auto;">Belum ada data.</div></div>
     <div class="header-bar">
         <div class="header-left"><i class="fa-regular fa-moon" id="theme-btn" onclick="toggleDarkMode()"></i></div>
-        <div class="header-right">
-            <i class="fa-solid fa-clock-rotate-left" onclick="toggleHistory()"></i>
-            <i class="fa-solid fa-gear" onclick="alert('Pengaturan: Presisi 10 digit aktif.')"></i>
-        </div>
+        <div class="header-right"><i class="fa-solid fa-clock-rotate-left" onclick="toggleHistory()"></i><i class="fa-solid fa-gear" onclick="alert('Presisi 10 digit aktif.')"></i></div>
     </div>
-
-    <div class="display">
-        <div id="history"></div>
-        <div id="result">0</div>
+    <div class="display"><div id="history"></div><div id="result">0</div></div>
+    <div class="mode-container" onclick="toggleScientific()"><span>ILMIAH</span><i class="fa-solid fa-chevron-up"></i></div>
+    <div id="sci-keys" class="hidden"> <button class="btn-sci" onclick="instantSci('sin')">sin</button><button class="btn-sci" onclick="instantSci('cos')">cos</button><button class="btn-sci" onclick="instantSci('tan')">tan</button><button class="btn-sci" onclick="instantSci('sqrt')">√</button>
+        <button class="btn-sci" onclick="instantSci('log10')">log</button><button class="btn-sci" onclick="press('^')">xʸ</button><button class="btn-sci" onclick="press('pi')">π</button><button class="btn-sci" onclick="press('e')">e</button>
     </div>
-
-    <div class="mode-container" onclick="toggleScientific()">
-        <span>ILMIAH</span>
-        <i class="fa-solid fa-chevron-up" id="sci-icon"></i>
-    </div>
-
-    <div id="sci-keys">
-        <button class="btn-sci" onclick="instantSci('sin')">sin</button>
-        <button class="btn-sci" onclick="instantSci('cos')">cos</button>
-        <button class="btn-sci" onclick="instantSci('tan')">tan</button>
-        <button class="btn-sci" onclick="instantSci('sqrt')">√</button>
-        <button class="btn-sci" onclick="instantSci('log10')">log</button>
-        <button class="btn-sci" onclick="press('^')">xʸ</button>
-        <button class="btn-sci" onclick="press('pi')">π</button>
-        <button class="btn-sci" onclick="press('e')">e</button>
-    </div>
-
     <div class="grid">
-        <button class="btn-ac" onclick="clearAll()">AC</button>
-        <button onclick="del()"><i class="fa-solid fa-delete-left"></i></button>
-        <button onclick="press('%')">%</button>
-        <button class="btn-op" onclick="press('/')">÷</button>
-        <button onclick="press('7')">7</button><button onclick="press('8')">8</button><button onclick="press('9')">9</button>
-        <button class="btn-op" onclick="press('*')">×</button>
-        <button onclick="press('4')">4</button><button onclick="press('5')">5</button><button onclick="press('6')">6</button>
-        <button class="btn-op" onclick="press('-')">-</button>
-        <button onclick="press('1')">1</button><button onclick="press('2')">2</button><button onclick="press('3')">3</button>
-        <button class="btn-op" onclick="press('+')">+</button>
-        <button onclick="press('0')">0</button>
-        <button onclick="press('.')">.</button>
-        <button class="btn-eq" onclick="calculate()">=</button>
+        <button class="btn-ac" onclick="clearAll()">AC</button><button onclick="del()"><i class="fa-solid fa-delete-left"></i></button><button onclick="press('%')">%</button><button class="btn-op" onclick="press('/')">÷</button>
+        <button onclick="press('7')">7</button><button onclick="press('8')">8</button><button onclick="press('9')">9</button><button class="btn-op" onclick="press('*')">×</button>
+        <button onclick="press('4')">4</button><button onclick="press('5')">5</button><button onclick="press('6')">6</button><button class="btn-op" onclick="press('-')">-</button>
+        <button onclick="press('1')">1</button><button onclick="press('2')">2</button><button onclick="press('3')">3</button><button class="btn-op" onclick="press('+')">+</button>
+        <button onclick="press('0')">0</button><button onclick="press('.')">.</button><button class="btn-eq" onclick="calculate()">=</button>
     </div>
 </div>
 
@@ -153,7 +75,6 @@
     const histDiv = document.getElementById('history');
     const histList = document.getElementById('history-list');
 
-    // --- FUNGSI BARU UNTUK TOMBOL ILMIAH ---
     function toggleScientific() {
         const sciKeys = document.getElementById('sci-keys');
         const modeCont = document.querySelector('.mode-container');
@@ -180,7 +101,6 @@
         histList.prepend(item);
     }
 
-    // --- LOGIKA UTAMA ---
     function press(v) { currentInput += v; render(); }
     function clearAll() { currentInput = ""; histDiv.innerText = ""; render(); }
     function del() { currentInput = currentInput.slice(0, -1); render(); }
