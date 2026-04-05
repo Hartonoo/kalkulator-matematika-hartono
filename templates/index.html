@@ -5,74 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalkulator Hartono</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .calc { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 300px; }
-        .display { text-align: right; margin-bottom: 20px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
+        body { font-family: sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .calc { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 280px; }
+        .display { text-align: right; margin-bottom: 20px; padding: 10px; border-bottom: 2px solid #f1f5f9; }
         #history { font-size: 0.8rem; color: #94a3b8; min-height: 1.2rem; }
-        #main-val { font-size: 2.2rem; font-weight: bold; color: #1e293b; overflow: hidden; }
+        #main-val { font-size: 2.2rem; font-weight: bold; color: #1e293b; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        button { border: none; padding: 15px; border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer; background: #f1f5f9; color: #334155; }
-        button:active { transform: scale(0.95); background: #e2e8f0; }
+        button { border: none; padding: 18px 0; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background: #f8fafc; }
         .btn-op { background: #ecfdf5; color: #10b981; }
         .btn-eq { background: #3b82f6; color: white; grid-column: span 2; }
         .btn-ac { background: #fef2f2; color: #ef4444; }
     </style>
 </head>
 <body>
-
 <div class="calc">
     <div class="display">
         <div id="history">{{ a1 }} {{ ops }} {{ a2 }}</div>
         <div id="main-val">{{ hasil if hasil != "" else (a1 if a1 != "" else "0") }}</div>
     </div>
-
-    <form method="POST">
+    <form method="POST"><div class="grid">
         <input type="hidden" name="a1" id="h1" value="{{ a1 }}">
         <input type="hidden" name="a2" id="h2" value="{{ a2 }}">
         <input type="hidden" name="ops" id="h_op" value="{{ ops }}">
-
-        <div class="grid">
-            <button type="button" class="btn-ac" onclick="resetAll()">AC</button>
-            <button type="button" onclick="addNum('7')">7</button>
-            <button type="button" onclick="addNum('8')">8</button>
-            <button type="button" class="btn-op" onclick="setOp('/')">÷</button>
-            
-            <button type="button" onclick="addNum('4')">4</button>
-            <button type="button" onclick="addNum('5')">5</button>
-            <button type="button" onclick="addNum('6')">6</button>
-            <button type="button" class="btn-op" onclick="setOp('*')">×</button>
-            
-            <button type="button" onclick="addNum('1')">1</button>
-            <button type="button" onclick="addNum('2')">2</button>
-            <button type="button" onclick="addNum('3')">3</button>
-            <button type="button" class="btn-op" onclick="setOp('-')">-</button>
-            
-            <button type="button" onclick="addNum('0')">0</button>
-            <button type="button" onclick="addNum('.')">.</button>
-            <button type="submit" class="btn-eq">=</button>
-            <button type="button" class="btn-op" onclick="setOp('+')">+</button>
-        </div>
-    </form>
+        <button type="button" class="btn-ac" onclick="location.href='/'">AC</button>
+        <button type="button" onclick="add('7')">7</button>
+        <button type="button" onclick="add('8')">8</button>
+        <button type="button" class="btn-op" onclick="set('/')">÷</button>
+        <button type="button" onclick="add('4')">4</button>
+        <button type="button" onclick="add('5')">5</button>
+        <button type="button" onclick="add('6')">6</button>
+        <button type="button" class="btn-op" onclick="set('*')">×</button>
+        <button type="button" onclick="add('1')">1</button>
+        <button type="button" onclick="add('2')">2</button>
+        <button type="button" onclick="add('3')">3</button>
+        <button type="button" class="btn-op" onclick="set('-')">-</button>
+        <button type="button" onclick="add('0')">0</button>
+        <button type="button" onclick="add('.')">.</button>
+        <button type="submit" class="btn-eq">=</button>
+        <button type="button" class="btn-op" onclick="set('+')">+</button>
+    </div></form>
 </div>
-
 <script>
-    let cur = "";
-    function addNum(n) {
-        cur += n;
-        document.getElementById('main-val').innerText = cur;
-        if (!document.getElementById('h_op').value) {
-            document.getElementById('h1').value = cur;
-        } else {
-            document.getElementById('h2').value = cur;
-        }
+    let c = "";
+    function add(n){ 
+        c += n; document.getElementById('main-val').innerText = c;
+        if(!document.getElementById('h_op').value) document.getElementById('h1').value = c;
+        else document.getElementById('h2').value = c;
     }
-    function setOp(op) {
-        document.getElementById('h_op').value = op;
-        document.getElementById('history').innerText = document.getElementById('h1').value + " " + op;
-        cur = "";
-    }
-    function resetAll() {
-        window.location.href = "/";
+    function set(o){
+        document.getElementById('h_op').value = o;
+        document.getElementById('history').innerText = document.getElementById('h1').value + " " + o;
+        c = "";
     }
 </script>
 </body>
