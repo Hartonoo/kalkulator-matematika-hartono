@@ -15,7 +15,7 @@
         body { font-family: sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .calc { background: var(--card); padding: 2rem; border-radius: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 320px; }
         .display { text-align: right; margin-bottom: 2rem; min-height: 80px; }
-        #history-label { font-size: 0.9rem; color: #94a3b8; margin-bottom: 0.5rem; }
+        #history-label { font-size: 0.9rem; color: #94a3b8; margin-bottom: 0.5rem; height: 1.2rem; }
         #main-val { font-size: 2.5rem; font-weight: bold; color: var(--text); }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; }
         button { border: none; padding: 1.2rem; border-radius: 1rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: var(--btn-bg); color: var(--text); }
@@ -68,7 +68,6 @@
     function addNum(n) {
         currentInput += n;
         document.getElementById('main-val').innerText = currentInput;
-        // Jika belum ada operasi, ini angka pertama. Jika sudah, ini angka kedua.
         if (document.getElementById('h_op').value === "") {
             document.getElementById('h1').value = currentInput;
         } else {
@@ -79,7 +78,7 @@
     function setOp(op) {
         document.getElementById('h_op').value = op;
         document.getElementById('history-label').innerText = document.getElementById('h1').value + " " + op;
-        currentInput = ""; // Reset input untuk angka kedua
+        currentInput = "";
     }
 
     function resetAll() {
@@ -89,6 +88,7 @@
         document.getElementById('main-val').innerText = "0";
         document.getElementById('history-label').innerText = "";
         currentInput = "";
+        window.location.href = "/"; // Refresh total agar data Flask hilang
     }
 </script>
 
