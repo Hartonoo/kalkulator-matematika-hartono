@@ -3,26 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Lengkap Hartono</title>
+    <title>Kalkulator Pintar Hartono</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .calc { background: white; padding: 25px; border-radius: 40px; width: 100%; max-width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.1); }
-        .display { text-align: right; padding: 20px; min-height: 140px; display: flex; flex-direction: column; justify-content: flex-end; }
-        #history { font-size: 1.1rem; color: #94a3b8; min-height: 1.5rem; margin-bottom: 5px; }
-        #result { font-size: 3rem; font-weight: 700; color: #1e293b; overflow: hidden; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f1f5f9; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
         
-        /* Grid 4 kolom agar semua tombol muat */
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        
-        button { border: none; padding: 18px 0; border-radius: 20px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f1f5f9; color: #334155; }
+        .calc { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 40px; 
+            width: 100%; 
+            max-width: 370px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
+        }
+
+        /* Area Tampilan */
+        .display { 
+            text-align: right; 
+            padding: 20px; 
+            min-height: 150px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-end;
+            background: #ffffff;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        #history { 
+            font-size: 1.1rem; 
+            color: #94a3b8; 
+            min-height: 1.6rem; 
+            margin-bottom: 4px; 
+        }
+
+        #result { 
+            font-size: 3rem; 
+            font-weight: 700; 
+            color: #1e293b; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            transition: font-size 0.15s ease; 
+            display: block;
+        }
+
+        /* Tata Letak Tombol */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 12px; 
+        }
+
+        button { 
+            border: none; 
+            padding: 18px 0; 
+            border-radius: 20px; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            background: #f8fafc; 
+            color: #334155; 
+        }
+
+        button:active { transform: scale(0.92); background: #e2e8f0; }
+
+        /* Warna Khusus Tombol */
         .btn-sci { color: #6366f1; background: #eef2ff; }
         .btn-op { background: #10b981; color: white; }
         .btn-ac { color: #ef4444; background: #fff1f2; }
-        .btn-eq { background: #3b82f6; color: white; }
+        .btn-eq { background: #3b82f6; color: white; grid-column: span 2; }
         
-        button:active { transform: scale(0.95); }
+        .btn-op:active { background: #059669; }
+        .btn-eq:active { background: #2563eb; }
     </style>
 </head>
 <body>
@@ -60,7 +121,7 @@
         
         <button onclick="press('0')">0</button>
         <button onclick="press('.')">.</button>
-        <button class="btn-eq" style="grid-column: span 2;" onclick="calculate()">=</button>
+        <button class="btn-eq" onclick="calculate()">=</button>
     </div>
 </div>
 
@@ -74,12 +135,6 @@
         render();
     }
 
-    function render() {
-        // Tampilan simbol yang lebih rapi
-        let view = currentInput.replace(/\*/g, '×').replace(/\//g, '÷').replace(/pi/g, 'π');
-        resDiv.innerText = view || "0";
-    }
-
     function clearAll() {
         currentInput = "";
         histDiv.innerText = "";
@@ -91,14 +146,43 @@
         render();
     }
 
-    // Fungsi otomatis untuk sin, cos, tan, log, sqrt
+    function render() {
+        // Mengubah simbol agar enak dilihat user
+        let viewText = currentInput
+            .replace(/\*/g, '×')
+            .replace(/\//g, '÷')
+            .replace(/pi/g, 'π')
+            .replace(/e/g, 'e');
+        
+        resDiv.innerText = viewText || "0";
+
+        // LOGIKA AUTO-SCALE FONT: Agar angka meluber langsung mengecil
+        const length = resDiv.innerText.length;
+        if (length <= 8) {
+            resDiv.style.fontSize = "3rem";
+        } else if (length > 8 && length <= 12) {
+            resDiv.style.fontSize = "2.2rem";
+        } else if (length > 12 && length <= 18) {
+            resDiv.style.fontSize = "1.6rem";
+        } else {
+            resDiv.style.fontSize = "1.2rem"; // Ukuran terkecil untuk input sangat panjang
+        }
+    }
+
+    // Fungsi klik sin/cos langsung hitung dari angka di layar
     function instantSci(type) {
         if (!currentInput) return;
         try {
-            let val = math.evaluate(currentInput);
-            let result = math.evaluate(`${type}(${val})`);
+            // Evaluasi angka saat ini dulu (misal 5+5 jadi 10)
+            let currentVal = math.evaluate(currentInput);
             
+            // Hitung fungsi ilmiahnya
+            let result = math.evaluate(`${type}(${currentVal})`);
+            
+            // Tampilkan riwayat proses di atas
             histDiv.innerText = `${type}(${currentInput})`;
+            
+            // Update input utama dengan hasil hitungan
             currentInput = math.format(result, {precision: 10}).toString();
             render();
         } catch (e) {
@@ -108,15 +192,17 @@
     }
 
     function calculate() {
+        if (!currentInput) return;
         try {
             let result = math.evaluate(currentInput);
             histDiv.innerText = currentInput + " =";
             currentInput = math.format(result, {precision: 10}).toString();
             render();
         } catch (e) {
-            resDiv.innerText = "Error";
+            resDiv.innerText = "Format Salah";
         }
     }
 </script>
+
 </body>
 </html>
