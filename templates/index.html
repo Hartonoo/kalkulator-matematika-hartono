@@ -8,37 +8,57 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        /* Variabel Warna untuk Mode Malam */
+        :root {
+            --bg-body: #f1f5f9;
+            --bg-calc: white;
+            --text-main: #1e293b;
+            --text-muted: #94a3b8;
+            --bg-btn: #f8fafc;
+        }
+
+        .dark-mode {
+            --bg-body: #0f172a;
+            --bg-calc: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #64748b;
+            --bg-btn: #334155;
+        }
+
         body { 
             font-family: 'Segoe UI', sans-serif; 
-            background: #f1f5f9; 
+            background: var(--bg-body); 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             min-height: 100vh; 
+            transition: 0.3s;
         }
         
         .calc { 
-            background: white; 
+            background: var(--bg-calc); 
             padding: 20px; 
             border-radius: 40px; 
             width: 100%; 
             max-width: 380px; 
             box-shadow: 0 25px 50px rgba(0,0,0,0.1); 
             position: relative;
+            transition: 0.3s;
         }
 
-        /* HEADER BAR: Ikon Atas */
         .header-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 10px 0 10px;
-            color: #94a3b8;
+            padding: 10px;
+            color: var(--text-muted);
             font-size: 1.2rem;
         }
-        .header-right i { margin-left: 15px; cursor: pointer; }
 
-        /* Area Tampilan */
+        .header-bar i { cursor: pointer; transition: 0.2s; }
+        .header-bar i:hover { color: #6366f1; }
+
         .display { 
             text-align: right; 
             padding: 20px; 
@@ -47,45 +67,15 @@
             flex-direction: column; 
             justify-content: flex-end;
             word-wrap: break-word;
-            overflow-wrap: break-word;
         }
 
-        #history { 
-            font-size: 1rem; 
-            color: #94a3b8; 
-            min-height: 1.5rem; 
-            margin-bottom: 5px; 
-        }
+        #history { font-size: 1rem; color: var(--text-muted); min-height: 1.5rem; margin-bottom: 5px; }
+        #result { font-size: 3.2rem; font-weight: 700; color: var(--text-main); line-height: 1.1; }
 
-        #result { 
-            font-size: 3.2rem; 
-            font-weight: 700; 
-            color: #1e293b; 
-            line-height: 1.1;
-            transition: font-size 0.15s ease;
-        }
+        .mode-container { text-align: center; color: var(--text-muted); margin-bottom: 15px; }
+        .mode-container span { font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; display: block; }
 
-        /* MODE LABEL: Tulisan ILMIAH */
-        .mode-container {
-            text-align: center;
-            color: #94a3b8;
-            margin-bottom: 15px;
-            cursor: pointer;
-        }
-        .mode-container span {
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            display: block;
-        }
-        .mode-container i { font-size: 0.8rem; margin-top: -5px; }
-
-        /* Grid Tombol */
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 12px; 
-        }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 
         button { 
             border: none; 
@@ -94,27 +84,47 @@
             font-size: 1.1rem; 
             font-weight: 600; 
             cursor: pointer; 
-            background: #f8fafc; 
-            color: #334155; 
+            background: var(--bg-btn); 
+            color: var(--text-main); 
             transition: 0.2s;
         }
 
         .btn-sci { color: #6366f1; background: #eef2ff; }
         .btn-op { background: #10b981; color: white; }
         .btn-ac { color: #ef4444; background: #fff1f2; }
-        .btn-eq { background: #3b82f6; color: white; }
+        .btn-eq { background: #3b82f6; color: white; grid-column: span 2; }
         
         button:active { transform: scale(0.95); }
+
+        /* Style untuk Modal Riwayat */
+        #history-modal {
+            display: none;
+            position: absolute;
+            top: 60px; right: 20px;
+            background: var(--bg-calc);
+            border: 1px solid var(--text-muted);
+            padding: 15px;
+            border-radius: 15px;
+            z-index: 100;
+            width: 200px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            color: var(--text-main);
+        }
     </style>
 </head>
 <body>
 
 <div class="calc">
+    <div id="history-modal">
+        <p style="font-size: 0.8rem; margin-bottom: 5px; border-bottom: 1px solid">Riwayat Terakhir:</p>
+        <div id="history-list" style="font-size: 0.7rem;">Belum ada riwayat.</div>
+    </div>
+
     <div class="header-bar">
-        <div class="header-left"><i class="fa-regular fa-moon"></i></div>
+        <div class="header-left"><i class="fa-regular fa-moon" id="theme-btn" onclick="toggleDarkMode()"></i></div>
         <div class="header-right">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <i class="fa-solid fa-gear"></i>
+            <i class="fa-solid fa-clock-rotate-left" onclick="toggleHistory()"></i>
+            <i class="fa-solid fa-gear" onclick="alert('Pengaturan segera hadir!')"></i>
         </div>
     </div>
 
@@ -133,29 +143,23 @@
         <button class="btn-sci" onclick="instantSci('cos')">cos</button>
         <button class="btn-sci" onclick="instantSci('tan')">tan</button>
         <button class="btn-sci" onclick="instantSci('sqrt')">√</button>
-
         <button class="btn-sci" onclick="instantSci('log10')">log</button>
         <button class="btn-sci" onclick="press('^')">xʸ</button>
         <button class="btn-sci" onclick="press('pi')">π</button>
         <button class="btn-sci" onclick="press('e')">e</button>
-
         <button class="btn-ac" onclick="clearAll()">AC</button>
         <button onclick="del()"><i class="fa-solid fa-delete-left"></i></button>
         <button onclick="press('%')">%</button>
         <button class="btn-op" onclick="press('/')">÷</button>
-        
         <button onclick="press('7')">7</button><button onclick="press('8')">8</button><button onclick="press('9')">9</button>
         <button class="btn-op" onclick="press('*')">×</button>
-        
         <button onclick="press('4')">4</button><button onclick="press('5')">5</button><button onclick="press('6')">6</button>
         <button class="btn-op" onclick="press('-')">-</button>
-        
         <button onclick="press('1')">1</button><button onclick="press('2')">2</button><button onclick="press('3')">3</button>
         <button class="btn-op" onclick="press('+')">+</button>
-        
         <button onclick="press('0')">0</button>
         <button onclick="press('.')">.</button>
-        <button class="btn-eq" style="grid-column: span 2;" onclick="calculate()">=</button>
+        <button class="btn-eq" onclick="calculate()">=</button>
     </div>
 </div>
 
@@ -163,32 +167,35 @@
     let currentInput = "";
     const resDiv = document.getElementById('result');
     const histDiv = document.getElementById('history');
+    const histList = document.getElementById('history-list');
 
-    function press(v) {
-        currentInput += v;
-        render();
+    // --- FITUR BARU: MODE & RIWAYAT ---
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const icon = document.getElementById('theme-btn');
+        icon.classList.toggle('fa-moon');
+        icon.classList.toggle('fa-sun');
     }
+
+    function toggleHistory() {
+        const modal = document.getElementById('history-modal');
+        modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function addHistory(val) {
+        histList.innerText = val;
+    }
+
+    // --- LOGIKA KALKULATOR (TETAP SAMA) ---
+    function press(v) { currentInput += v; render(); }
+    function clearAll() { currentInput = ""; histDiv.innerText = ""; render(); }
+    function del() { currentInput = currentInput.slice(0, -1); render(); }
 
     function render() {
         let view = currentInput.replace(/\*/g, '×').replace(/\//g, '÷').replace(/pi/g, 'π');
         resDiv.innerText = view || "0";
-        
-        // Logika Auto-Scale Font tetap dipertahankan
         const len = resDiv.innerText.length;
-        if (len <= 8) resDiv.style.fontSize = "3.2rem";
-        else if (len <= 14) resDiv.style.fontSize = "2.2rem";
-        else resDiv.style.fontSize = "1.5rem";
-    }
-
-    function clearAll() {
-        currentInput = "";
-        histDiv.innerText = "";
-        render();
-    }
-
-    function del() {
-        currentInput = currentInput.slice(0, -1);
-        render();
+        resDiv.style.fontSize = len > 10 ? (len > 20 ? "1.5rem" : "2.2rem") : "3.2rem";
     }
 
     function instantSci(type) {
@@ -196,25 +203,24 @@
         try {
             let val = math.evaluate(currentInput);
             let result = math.evaluate(`${type}(${val})`);
+            let logMsg = `${type}(${currentInput}) = ${result}`;
             histDiv.innerText = `${type}(${currentInput})`;
             currentInput = math.format(result, {precision: 10}).toString();
+            addHistory(logMsg);
             render();
-        } catch (e) {
-            resDiv.innerText = "Error";
-            setTimeout(() => render(), 1000);
-        }
+        } catch (e) { resDiv.innerText = "Error"; }
     }
 
     function calculate() {
         if (!currentInput) return;
         try {
             let result = math.evaluate(currentInput);
+            let logMsg = `${currentInput} = ${result}`;
             histDiv.innerText = currentInput + " =";
             currentInput = math.format(result, {precision: 10}).toString();
+            addHistory(logMsg);
             render();
-        } catch (e) {
-            resDiv.innerText = "Format Salah";
-        }
+        } catch (e) { resDiv.innerText = "Format Salah"; }
     }
 </script>
 </body>
