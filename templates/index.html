@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Pintar Hartono</title>
+    <title>Kalkulator Hartono</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #f1f5f9; 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #f8fafc; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -21,41 +21,37 @@
             padding: 25px; 
             border-radius: 40px; 
             width: 100%; 
-            max-width: 370px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
+            max-width: 380px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.1); 
         }
 
-        /* Area Tampilan */
+        /* Area Tampilan Persis Gambar */
         .display { 
             text-align: right; 
             padding: 20px; 
-            min-height: 150px; 
+            min-height: 180px; 
             display: flex; 
             flex-direction: column; 
             justify-content: flex-end;
-            background: #ffffff;
-            border-radius: 20px;
-            margin-bottom: 20px;
+            word-wrap: break-word; /* Agar angka panjang turun ke bawah */
+            overflow-wrap: break-word;
         }
 
         #history { 
             font-size: 1.1rem; 
             color: #94a3b8; 
-            min-height: 1.6rem; 
-            margin-bottom: 4px; 
+            min-height: 1.5rem; 
+            margin-bottom: 8px; 
+            letter-spacing: 1px;
         }
 
         #result { 
-            font-size: 3rem; 
+            font-size: 3.2rem; 
             font-weight: 700; 
             color: #1e293b; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            transition: font-size 0.15s ease; 
-            display: block;
+            line-height: 1.1;
         }
 
-        /* Tata Letak Tombol */
         .grid { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -69,21 +65,17 @@
             font-size: 1.1rem; 
             font-weight: 600; 
             cursor: pointer; 
-            transition: all 0.2s; 
-            background: #f8fafc; 
+            background: #f1f5f9; 
             color: #334155; 
+            transition: 0.2s;
         }
 
-        button:active { transform: scale(0.92); background: #e2e8f0; }
-
-        /* Warna Khusus Tombol */
         .btn-sci { color: #6366f1; background: #eef2ff; }
         .btn-op { background: #10b981; color: white; }
         .btn-ac { color: #ef4444; background: #fff1f2; }
         .btn-eq { background: #3b82f6; color: white; grid-column: span 2; }
         
-        .btn-op:active { background: #059669; }
-        .btn-eq:active { background: #2563eb; }
+        button:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -135,6 +127,14 @@
         render();
     }
 
+    function render() {
+        let view = currentInput.replace(/\*/g, '×').replace(/\//g, '÷').replace(/pi/g, 'π');
+        resDiv.innerText = view || "0";
+        // Auto-scale font agar tetap rapi
+        const len = resDiv.innerText.length;
+        resDiv.style.fontSize = len > 10 ? (len > 20 ? "1.5rem" : "2.2rem") : "3.2rem";
+    }
+
     function clearAll() {
         currentInput = "";
         histDiv.innerText = "";
@@ -146,43 +146,12 @@
         render();
     }
 
-    function render() {
-        // Mengubah simbol agar enak dilihat user
-        let viewText = currentInput
-            .replace(/\*/g, '×')
-            .replace(/\//g, '÷')
-            .replace(/pi/g, 'π')
-            .replace(/e/g, 'e');
-        
-        resDiv.innerText = viewText || "0";
-
-        // LOGIKA AUTO-SCALE FONT: Agar angka meluber langsung mengecil
-        const length = resDiv.innerText.length;
-        if (length <= 8) {
-            resDiv.style.fontSize = "3rem";
-        } else if (length > 8 && length <= 12) {
-            resDiv.style.fontSize = "2.2rem";
-        } else if (length > 12 && length <= 18) {
-            resDiv.style.fontSize = "1.6rem";
-        } else {
-            resDiv.style.fontSize = "1.2rem"; // Ukuran terkecil untuk input sangat panjang
-        }
-    }
-
-    // Fungsi klik sin/cos langsung hitung dari angka di layar
     function instantSci(type) {
         if (!currentInput) return;
         try {
-            // Evaluasi angka saat ini dulu (misal 5+5 jadi 10)
             let currentVal = math.evaluate(currentInput);
-            
-            // Hitung fungsi ilmiahnya
             let result = math.evaluate(`${type}(${currentVal})`);
-            
-            // Tampilkan riwayat proses di atas
             histDiv.innerText = `${type}(${currentInput})`;
-            
-            // Update input utama dengan hasil hitungan
             currentInput = math.format(result, {precision: 10}).toString();
             render();
         } catch (e) {
@@ -203,6 +172,5 @@
         }
     }
 </script>
-
 </body>
 </html>
