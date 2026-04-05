@@ -3,52 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Otomatis Hartono</title>
+    <title>Kalkulator Instan Hartono</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .calc { background: white; padding: 25px; border-radius: 35px; width: 100%; max-width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
-        .mode-text { text-align: center; font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-bottom: 10px; cursor: pointer; text-transform: uppercase; }
-        .display { text-align: right; margin-bottom: 20px; padding: 10px; min-height: 120px; display: flex; flex-direction: column; justify-content: flex-end; }
-        #result-preview { font-size: 1rem; color: #94a3b8; margin-bottom: 5px; min-height: 1.2rem; }
-        #main-val { font-size: 2.2rem; font-weight: 700; color: #1e293b; word-wrap: break-word; }
-        #sci-panel { display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .calc { background: white; padding: 25px; border-radius: 40px; width: 100%; max-width: 360px; box-shadow: 0 25px 50px rgba(0,0,0,0.1); }
+        .display { text-align: right; padding: 20px; min-height: 140px; display: flex; flex-direction: column; justify-content: flex-end; }
+        #history { font-size: 1.1rem; color: #94a3b8; min-height: 1.5rem; margin-bottom: 5px; }
+        #result { font-size: 3rem; font-weight: 700; color: #1e293b; overflow: hidden; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        button { border: none; padding: 18px 0; border-radius: 18px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f8fafc; color: #475569; }
-        .btn-sci { color: #6366f1; background: #f1f5f9; }
+        button { border: none; padding: 18px 0; border-radius: 20px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f1f5f9; }
+        .btn-sci { color: #6366f1; background: #eef2ff; }
         .btn-op { background: #10b981; color: white; }
-        .btn-ac { color: #ef4444; background: #fef2f2; }
-        .btn-eq { background: #3b82f6 !important; color: white !important; grid-column: span 2; }
+        .btn-ac { color: #ef4444; background: #fff1f2; }
+        .btn-eq { background: #3b82f6; color: white; grid-column: span 2; }
+        button:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
 <div class="calc">
-    <div class="mode-text" onclick="toggleSci()">
-        <span id="mode-label">Sederhana</span> ⌵
-    </div>
-
     <div class="display">
-        <div id="result-preview"></div>
-        <div id="main-val">0</div>
-    </div>
-
-    <div id="sci-panel">
-        <button class="btn-sci" onclick="press('sin(')">sin</button>
-        <button class="btn-sci" onclick="press('cos(')">cos</button>
-        <button class="btn-sci" onclick="press('tan(')">tan</button>
-        <button class="btn-sci" onclick="press('sqrt(')">√</button>
-        <button class="btn-sci" onclick="press('log10(')">log</button>
-        <button class="btn-sci" onclick="press('^')">xʸ</button>
-        <button class="btn-sci" onclick="press('pi')">π</button>
-        <button class="btn-sci" onclick="press('(')">(</button>
+        <div id="history"></div>
+        <div id="result">0</div>
     </div>
 
     <div class="grid">
+        <button class="btn-sci" onclick="instantSci('sin')">sin</button>
+        <button class="btn-sci" onclick="instantSci('cos')">cos</button>
+        <button class="btn-sci" onclick="instantSci('tan')">tan</button>
+        <button class="btn-sci" onclick="instantSci('sqrt')">√</button>
+
         <button class="btn-ac" onclick="clearAll()">AC</button>
         <button onclick="del()">⌫</button>
-        <button onclick="press(')')">)</button>
+        <button onclick="press('%')">%</button>
         <button class="btn-op" onclick="press('/')">÷</button>
         
         <button onclick="press('7')">7</button><button onclick="press('8')">8</button><button onclick="press('9')">9</button>
@@ -60,82 +49,68 @@
         <button onclick="press('1')">1</button><button onclick="press('2')">2</button><button onclick="press('3')">3</button>
         <button class="btn-op" onclick="press('+')">+</button>
         
-        <button onclick="press('0')">0</button><button onclick="press('.')">.</button>
+        <button onclick="press('0')">0</button>
+        <button onclick="press('.')">.</button>
         <button class="btn-eq" onclick="calculate()">=</button>
     </div>
 </div>
 
 <script>
     let currentInput = "";
-    const mainDisplay = document.getElementById('main-val');
-    const previewDisplay = document.getElementById('result-preview');
+    const resDiv = document.getElementById('result');
+    const histDiv = document.getElementById('history');
 
     function press(v) {
         currentInput += v;
         render();
-        autoCalculate(); // Jalankan hitung otomatis setiap tombol ditekan
     }
 
     function render() {
-        let viewText = currentInput.replace(/pi/g, 'π').replace(/sqrt\(/g, '√(').replace(/log10\(/g, 'log(');
-        mainDisplay.innerText = viewText || "0";
+        resDiv.innerText = currentInput || "0";
     }
 
-    function clearAll() { 
-        currentInput = ""; 
-        previewDisplay.innerText = "";
-        render(); 
+    function clearAll() {
+        currentInput = "";
+        histDiv.innerText = "";
+        render();
     }
 
-    function del() { 
-        currentInput = currentInput.slice(0, -1); 
-        render(); 
-        autoCalculate(); 
+    function del() {
+        currentInput = currentInput.slice(0, -1);
+        render();
     }
 
-    function autoCalculate() {
+    // FUNGSI UTAMA: Klik sin/cos langsung hitung dari angka di layar
+    function instantSci(type) {
+        if (!currentInput) return;
+        
         try {
-            if (!currentInput || currentInput.endsWith('(') || currentInput.endsWith('+') || currentInput.endsWith('-') || currentInput.endsWith('*') || currentInput.endsWith('/')) {
-                previewDisplay.innerText = "";
-                return;
-            }
-
-            let checkInput = currentInput;
-            // Perbaikan otomatis: 5sin -> 5*sin
-            checkInput = checkInput.replace(/(\d)(sin|cos|tan|log10|sqrt|pi|\()/g, '$1*$2');
+            // Mengambil angka saat ini dan menghitungnya langsung
+            let val = math.evaluate(currentInput);
+            let formula = `${type}(${val})`;
+            let result = math.evaluate(formula);
             
-            // Perbaikan otomatis: Tutup kurung yang lupa diketik
-            const openBrackets = (checkInput.match(/\(/g) || []).length;
-            const closeBrackets = (checkInput.match(/\)/g) || []).length;
-            for(let i=0; i < (openBrackets - closeBrackets); i++) {
-                checkInput += ")";
-            }
-
-            // Hitung menggunakan Math.js
-            let result = math.evaluate(checkInput);
-            let formatted = math.format(result, {precision: 10}).toString();
+            // Tampilkan proses di riwayat (angka kecil)
+            histDiv.innerText = `${type}(${currentInput})`;
             
-            // Tampilkan hasil sementara di bagian atas (preview)
-            previewDisplay.innerText = formatted;
+            // Tampilkan hasil di angka besar (otomatis)
+            currentInput = math.format(result, {precision: 10}).toString();
+            render();
         } catch (e) {
-            previewDisplay.innerText = "";
+            resDiv.innerText = "Error";
+            setTimeout(() => render(), 1000);
         }
     }
 
     function calculate() {
-        if (previewDisplay.innerText !== "") {
-            currentInput = previewDisplay.innerText;
-            previewDisplay.innerText = "";
+        try {
+            let result = math.evaluate(currentInput);
+            histDiv.innerText = currentInput + " =";
+            currentInput = math.format(result, {precision: 10}).toString();
             render();
+        } catch (e) {
+            resDiv.innerText = "Error";
         }
-    }
-
-    function toggleSci() {
-        const panel = document.getElementById('sci-panel');
-        const label = document.getElementById('mode-label');
-        const isHidden = panel.style.display === "none" || panel.style.display === "";
-        panel.style.display = isHidden ? "grid" : "none";
-        label.innerText = isHidden ? "Ilmiah" : "Sederhana";
     }
 </script>
 </body>
