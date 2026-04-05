@@ -7,34 +7,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: 0.3s; }
-        .dark-mode { background: #0f172a; }
-        .calc { background: white; padding: 25px; border-radius: 35px; width: 100%; max-width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); transition: 0.3s; }
-        .dark-mode .calc { background: #1e293b; color: white; }
-        .header-tools { display: flex; justify-content: space-between; margin-bottom: 20px; color: #94a3b8; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .calc { background: white; padding: 25px; border-radius: 35px; width: 100%; max-width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
         .mode-text { text-align: center; font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-bottom: 10px; cursor: pointer; text-transform: uppercase; }
         .display { text-align: right; margin-bottom: 20px; padding: 10px; min-height: 120px; display: flex; flex-direction: column; justify-content: flex-end; }
         #main-val { font-size: 2.2rem; font-weight: 700; color: #1e293b; word-wrap: break-word; overflow-wrap: break-word; }
-        .dark-mode #main-val { color: #f1f5f9; }
         #sci-panel { display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         button { border: none; padding: 18px 0; border-radius: 18px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f8fafc; color: #475569; }
-        .dark-mode button { background: #334155; color: #cbd5e1; }
-        .btn-sci { color: #6366f1; background: #f1f5f9; font-size: 0.9rem; }
+        .btn-sci { color: #6366f1; background: #f1f5f9; }
         .btn-op { background: #10b981; color: white; }
         .btn-ac { color: #ef4444; background: #fef2f2; }
         .btn-eq { background: #3b82f6 !important; color: white !important; grid-column: span 2; }
-        .icon { cursor: pointer; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
 <div class="calc">
-    <div class="header-tools">
-        <span class="icon" onclick="toggleTheme()" id="theme-icon">🌙</span>
-        <div class="icon">🕒 ⚙️</div>
-    </div>
-
     <div class="mode-text" onclick="toggleSci()">
         <span id="mode-label">Sederhana</span> ⌵
     </div>
@@ -84,7 +73,6 @@
     }
 
     function render() {
-        // Tampilan simbol yang lebih rapi di layar
         let viewText = currentInput.replace(/pi/g, 'π').replace(/sqrt\(/g, '√(').replace(/log10\(/g, 'log(');
         display.innerText = viewText || "0";
     }
@@ -96,7 +84,7 @@
         try {
             if (!currentInput) return;
 
-            // Perbaikan otomatis: Menambah kurung tutup jika kurang
+            // Perbaikan otomatis: Menutup kurung jika Hartono lupa
             let checkInput = currentInput;
             const openBrackets = (checkInput.match(/\(/g) || []).length;
             const closeBrackets = (checkInput.match(/\)/g) || []).length;
@@ -104,10 +92,10 @@
                 checkInput += ")";
             }
 
-            // Eksekusi perhitungan otomatis
+            // MENGHITUNG OTOMATIS: Menggunakan Math.js
             let result = math.evaluate(checkInput);
             
-            // Format angka agar tidak keluar layar (maks 10 desimal)
+            // Format angka agar rapi dan tidak meluber (max 10 desimal)
             currentInput = math.format(result, {precision: 10}).toString();
             render();
         } catch (e) {
@@ -122,11 +110,6 @@
         const isHidden = panel.style.display === "none" || panel.style.display === "";
         panel.style.display = isHidden ? "grid" : "none";
         label.innerText = isHidden ? "Ilmiah" : "Sederhana";
-    }
-
-    function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-        document.getElementById('theme-icon').innerText = document.body.classList.contains('dark-mode') ? "☀️" : "🌙";
     }
 </script>
 </body>
