@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Hartono</title>
+    <title>Kalkulator Pro Hartono</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: 'Segoe UI', sans-serif; 
-            background: #f8fafc; 
+            background: #f1f5f9; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -18,31 +19,42 @@
         
         .calc { 
             background: white; 
-            padding: 25px; 
+            padding: 20px; 
             border-radius: 40px; 
             width: 100%; 
             max-width: 380px; 
             box-shadow: 0 25px 50px rgba(0,0,0,0.1); 
+            position: relative;
         }
 
-        /* Area Tampilan Persis Gambar */
+        /* HEADER BAR: Ikon Atas */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 10px 0 10px;
+            color: #94a3b8;
+            font-size: 1.2rem;
+        }
+        .header-right i { margin-left: 15px; cursor: pointer; }
+
+        /* Area Tampilan */
         .display { 
             text-align: right; 
             padding: 20px; 
-            min-height: 180px; 
+            min-height: 160px; 
             display: flex; 
             flex-direction: column; 
             justify-content: flex-end;
-            word-wrap: break-word; /* Agar angka panjang turun ke bawah */
+            word-wrap: break-word;
             overflow-wrap: break-word;
         }
 
         #history { 
-            font-size: 1.1rem; 
+            font-size: 1rem; 
             color: #94a3b8; 
             min-height: 1.5rem; 
-            margin-bottom: 8px; 
-            letter-spacing: 1px;
+            margin-bottom: 5px; 
         }
 
         #result { 
@@ -50,8 +62,25 @@
             font-weight: 700; 
             color: #1e293b; 
             line-height: 1.1;
+            transition: font-size 0.15s ease;
         }
 
+        /* MODE LABEL: Tulisan ILMIAH */
+        .mode-container {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .mode-container span {
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            display: block;
+        }
+        .mode-container i { font-size: 0.8rem; margin-top: -5px; }
+
+        /* Grid Tombol */
         .grid { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -65,7 +94,7 @@
             font-size: 1.1rem; 
             font-weight: 600; 
             cursor: pointer; 
-            background: #f1f5f9; 
+            background: #f8fafc; 
             color: #334155; 
             transition: 0.2s;
         }
@@ -73,7 +102,7 @@
         .btn-sci { color: #6366f1; background: #eef2ff; }
         .btn-op { background: #10b981; color: white; }
         .btn-ac { color: #ef4444; background: #fff1f2; }
-        .btn-eq { background: #3b82f6; color: white; grid-column: span 2; }
+        .btn-eq { background: #3b82f6; color: white; }
         
         button:active { transform: scale(0.95); }
     </style>
@@ -81,9 +110,22 @@
 <body>
 
 <div class="calc">
+    <div class="header-bar">
+        <div class="header-left"><i class="fa-regular fa-moon"></i></div>
+        <div class="header-right">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <i class="fa-solid fa-gear"></i>
+        </div>
+    </div>
+
     <div class="display">
         <div id="history"></div>
         <div id="result">0</div>
+    </div>
+
+    <div class="mode-container">
+        <span>ILMIAH</span>
+        <i class="fa-solid fa-chevron-up"></i>
     </div>
 
     <div class="grid">
@@ -98,7 +140,7 @@
         <button class="btn-sci" onclick="press('e')">e</button>
 
         <button class="btn-ac" onclick="clearAll()">AC</button>
-        <button onclick="del()">⌫</button>
+        <button onclick="del()"><i class="fa-solid fa-delete-left"></i></button>
         <button onclick="press('%')">%</button>
         <button class="btn-op" onclick="press('/')">÷</button>
         
@@ -113,7 +155,7 @@
         
         <button onclick="press('0')">0</button>
         <button onclick="press('.')">.</button>
-        <button class="btn-eq" onclick="calculate()">=</button>
+        <button class="btn-eq" style="grid-column: span 2;" onclick="calculate()">=</button>
     </div>
 </div>
 
@@ -130,9 +172,12 @@
     function render() {
         let view = currentInput.replace(/\*/g, '×').replace(/\//g, '÷').replace(/pi/g, 'π');
         resDiv.innerText = view || "0";
-        // Auto-scale font agar tetap rapi
+        
+        // Logika Auto-Scale Font tetap dipertahankan
         const len = resDiv.innerText.length;
-        resDiv.style.fontSize = len > 10 ? (len > 20 ? "1.5rem" : "2.2rem") : "3.2rem";
+        if (len <= 8) resDiv.style.fontSize = "3.2rem";
+        else if (len <= 14) resDiv.style.fontSize = "2.2rem";
+        else resDiv.style.fontSize = "1.5rem";
     }
 
     function clearAll() {
@@ -149,8 +194,8 @@
     function instantSci(type) {
         if (!currentInput) return;
         try {
-            let currentVal = math.evaluate(currentInput);
-            let result = math.evaluate(`${type}(${currentVal})`);
+            let val = math.evaluate(currentInput);
+            let result = math.evaluate(`${type}(${val})`);
             histDiv.innerText = `${type}(${currentInput})`;
             currentInput = math.format(result, {precision: 10}).toString();
             render();
