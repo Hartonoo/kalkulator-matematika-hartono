@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalkulator Hartono</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .calc { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); width: 300px; }
-        .display { text-align: right; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 15px; min-height: 80px; display: flex; flex-direction: column; justify-content: center; }
-        #history { font-size: 0.9rem; color: #94a3b8; height: 1.2rem; margin-bottom: 5px; }
-        #main-val { font-size: 2.4rem; font-weight: bold; color: #1e293b; word-wrap: break-word; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .calc { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); width: 320px; }
+        .display { text-align: right; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 15px; min-height: 100px; display: flex; flex-direction: column; justify-content: flex-end; }
+        #history { font-size: 0.9rem; color: #94a3b8; min-height: 1.2rem; margin-bottom: 5px; }
+        #main-val { font-size: 2.5rem; font-weight: bold; color: #1e293b; }
+        /* Grid 4 kolom tetap */
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        button { border: none; padding: 18px 0; border-radius: 16px; font-size: 1.2rem; font-weight: 600; cursor: pointer; transition: all 0.2s; background: #f1f5f9; color: #475569; }
-        button:active { transform: scale(0.95); background: #e2e8f0; }
+        button { border: none; padding: 18px 0; border-radius: 16px; font-size: 1.2rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f1f5f9; color: #475569; width: 100%; }
+        button:active { transform: scale(0.92); background: #e2e8f0; }
         .btn-op { background: #ecfdf5; color: #10b981; }
-        .btn-eq { background: #3b82f6; color: white; grid-column: span 2; }
+        /* Tombol Sama Dengan memakai 2 kolom agar pas */
+        .btn-eq { background: #3b82f6 !important; color: white !important; grid-column: span 2; }
         .btn-ac { background: #fef2f2; color: #ef4444; }
     </style>
 </head>
@@ -56,20 +59,22 @@
 </div>
 
 <script>
-    let inputStr = "";
+    let cur = "";
     function press(n) {
-        inputStr += n;
-        document.getElementById('main-val').innerText = inputStr;
+        cur += n;
+        document.getElementById('main-val').innerText = cur;
+        // Jika belum ada operator, isi angka pertama (a1)
         if (!document.getElementById('h_op').value) {
-            document.getElementById('h1').value = inputStr;
+            document.getElementById('h1').value = cur;
         } else {
-            document.getElementById('h2').value = inputStr;
+            // Jika sudah ada operator, isi angka kedua (a2)
+            document.getElementById('h2').value = cur;
         }
     }
     function setOp(op) {
         document.getElementById('h_op').value = op;
         document.getElementById('history').innerText = document.getElementById('h1').value + " " + op;
-        inputStr = "";
+        cur = ""; // Kosongkan input untuk angka kedua
     }
 </script>
 
