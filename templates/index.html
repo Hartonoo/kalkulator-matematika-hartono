@@ -3,28 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Hartono</title>
+    <title>Kalkulator Pro Hartono</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: 0.3s; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: 0.3s; }
         .dark-mode { background: #0f172a; }
-        .calc { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); width: 100%; max-width: 360px; transition: 0.3s; }
-        .dark-mode .calc { background: #1e293b; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        .header-tools { display: flex; justify-content: space-between; align-items: center; color: #94a3b8; margin-bottom: 30px; }
-        .mode-text { text-align: center; font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; cursor: pointer; }
-        .display { text-align: right; margin-bottom: 25px; padding: 10px; min-height: 100px; display: flex; flex-direction: column; justify-content: flex-end; }
-        #history-text { font-size: 1rem; color: #cbd5e1; min-height: 1.5rem; }
-        #main-val { font-size: 2.5rem; font-weight: 700; color: #1e293b; }
+        
+        .calc { background: white; padding: 25px; border-radius: 35px; width: 100%; max-width: 360px; transition: 0.3s; position: relative; overflow: hidden; }
+        .dark-mode .calc { background: #1e293b; color: white; }
+
+        .header-tools { display: flex; justify-content: space-between; padding-bottom: 20px; color: #94a3b8; }
+        
+        /* Tampilan Layar agar tidak meluber */
+        .display { text-align: right; margin-bottom: 20px; padding: 10px; min-height: 120px; display: flex; flex-direction: column; justify-content: flex-end; }
+        #history-text { font-size: 0.9rem; color: #cbd5e1; margin-bottom: 5px; }
+        #main-val { 
+            font-size: 2.5rem; font-weight: 700; color: #1e293b; 
+            word-wrap: break-word; overflow-wrap: break-word; /* Mencegah meluber */
+            max-height: 100px; overflow-y: auto; 
+        }
         .dark-mode #main-val { color: #f1f5f9; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        button { border: none; padding: 18px 0; border-radius: 18px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f8fafc; color: #475569; }
+
+        .mode-text { text-align: center; font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-bottom: 15px; cursor: pointer; text-transform: uppercase; }
+
+        /* Panel Ilmiah yang bisa disembunyikan */
+        #sci-panel { display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
+        .grid-base { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        
+        button { border: none; padding: 15px 0; border-radius: 18px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f8fafc; color: #475569; }
         .dark-mode button { background: #334155; color: #cbd5e1; }
-        button:active { transform: scale(0.95); }
-        .btn-sci { color: #6366f1; background: #f1f5f9; }
-        .dark-mode .btn-sci { background: #1e1b4b; color: #818cf8; }
+        .btn-sci { color: #6366f1; background: #f1f5f9; font-size: 0.9rem; }
         .btn-op { background: #10b981; color: white; }
         .btn-ac { color: #ef4444; background: #fef2f2; }
         .btn-eq { background: #3b82f6 !important; color: white !important; grid-column: span 2; }
+        
         .icon { cursor: pointer; font-size: 1.2rem; }
     </style>
 </head>
@@ -33,15 +46,12 @@
 <div class="calc">
     <div class="header-tools">
         <span class="icon" onclick="toggleTheme()" id="theme-icon">🌙</span>
-        <div>
-            <span class="icon" style="margin-right: 15px;" onclick="alert('Fitur riwayat segera hadir!')">🕒</span>
-            <span class="icon" onclick="alert('Pengaturan dibuka')">⚙️</span>
-        </div>
+        <div class="icon">🕒 ⚙️</div>
     </div>
 
-    <div class="mode-text" onclick="alert('Mode Ilmiah Aktif')">
-        Sederhana
-        <div style="font-size: 0.8rem;">⌵</div>
+    <div class="mode-text" onclick="toggleSci()">
+        <span id="mode-label">Sederhana</span>
+        <div id="arrow-icon">⌵</div>
     </div>
 
     <div class="display">
@@ -49,97 +59,81 @@
         <div id="main-val">0</div>
     </div>
 
-    <div class="grid">
-        <button class="btn-sci" onclick="sci('Math.sin(')">sin</button>
-        <button class="btn-sci" onclick="sci('Math.cos(')">cos</button>
-        <button class="btn-sci" onclick="sci('Math.tan(')">tan</button>
-        <button class="btn-sci" onclick="sci('Math.sqrt(')">√</button>
-        <button class="btn-sci" onclick="sci('Math.log10(')">log</button>
-        <button class="btn-sci" onclick="press('**')">xʸ</button>
-        <button class="btn-sci" onclick="press('Math.PI')">π</button>
-        <button class="btn-sci" onclick="press('Math.E')">e</button>
+    <div id="sci-panel">
+        <button class="btn-sci" onclick="press('sin(')">sin</button>
+        <button class="btn-sci" onclick="press('cos(')">cos</button>
+        <button class="btn-sci" onclick="press('tan(')">tan</button>
+        <button class="btn-sci" onclick="press('sqrt(')">√</button>
+        <button class="btn-sci" onclick="press('log10(')">log</button>
+        <button class="btn-sci" onclick="press('^')">xʸ</button>
+        <button class="btn-sci" onclick="press('PI')">π</button>
+        <button class="btn-sci" onclick="press('E')">e</button>
+    </div>
 
+    <div class="grid-base">
         <button class="btn-ac" onclick="clearAll()">AC</button>
         <button onclick="del()">⌫</button>
         <button onclick="press('%')">%</button>
         <button class="btn-op" onclick="press('/')">÷</button>
-        
-        <button onclick="press('7')">7</button>
-        <button onclick="press('8')">8</button>
-        <button onclick="press('9')">9</button>
+        <button onclick="press('7')">7</button><button onclick="press('8')">8</button><button onclick="press('9')">9</button>
         <button class="btn-op" onclick="press('*')">×</button>
-        
-        <button onclick="press('4')">4</button>
-        <button onclick="press('5')">5</button>
-        <button onclick="press('6')">6</button>
+        <button onclick="press('4')">4</button><button onclick="press('5')">5</button><button onclick="press('6')">6</button>
         <button class="btn-op" onclick="press('-')">-</button>
-        
-        <button onclick="press('1')">1</button>
-        <button onclick="press('2')">2</button>
-        <button onclick="press('3')">3</button>
+        <button onclick="press('1')">1</button><button onclick="press('2')">2</button><button onclick="press('3')">3</button>
         <button class="btn-op" onclick="press('+')">+</button>
-        
-        <button onclick="press('0')">0</button>
-        <button onclick="press('.')">.</button>
+        <button onclick="press('0')">0</button><button onclick="press('.')">.</button>
         <button class="btn-eq" onclick="calculate()">=</button>
     </div>
 </div>
 
 <script>
-    let currentInput = "";
-    let display = document.getElementById('main-val');
-    let history = document.getElementById('history-text');
+    let input = "";
+    const display = document.getElementById('main-val');
+    const hist = document.getElementById('history-text');
 
     function press(v) {
-        if (currentInput === "0") currentInput = "";
-        currentInput += v;
-        updateDisplay();
+        input += v;
+        render();
     }
 
-    function sci(func) {
-        currentInput += func;
-        updateDisplay();
+    function render() {
+        display.innerText = input || "0";
     }
 
-    function clearAll() {
-        currentInput = "0";
-        history.innerText = "";
-        updateDisplay();
-    }
-
-    function del() {
-        currentInput = currentInput.slice(0, -1) || "0";
-        updateDisplay();
-    }
-
-    function updateDisplay() {
-        // Membersihkan tampilan agar Math.PI terlihat seperti simbol
-        let cleanText = currentInput.replace(/Math.PI/g, 'π').replace(/Math.E/g, 'e').replace(/Math\./g, '');
-        display.innerText = cleanText || "0";
-    }
+    function clearAll() { input = ""; hist.innerText = ""; render(); }
+    function del() { input = input.slice(0, -1); render(); }
 
     function calculate() {
         try {
-            history.innerText = display.innerText + " =";
-            // Memastikan kurung tutup untuk fungsi ilmiah
-            let expression = currentInput;
-            let openBrackets = (expression.match(/\(/g) || []).length;
-            let closeBrackets = (expression.match(/\)/g) || []).length;
-            for(let i=0; i < (openBrackets - closeBrackets); i++) expression += ")";
-            
-            let result = eval(expression);
-            currentInput = result.toString();
-            display.innerText = result;
+            // Menggunakan math.js untuk hitungan otomatis sin/cos/dll
+            let result = math.evaluate(input);
+            hist.innerText = input + " =";
+            input = math.format(result, {precision: 10}).toString();
+            render();
         } catch (e) {
             display.innerText = "Error";
-            currentInput = "";
+            input = "";
+        }
+    }
+
+    function toggleSci() {
+        const panel = document.getElementById('sci-panel');
+        const label = document.getElementById('mode-label');
+        const arrow = document.getElementById('arrow-icon');
+        if (panel.style.display === "grid") {
+            panel.style.display = "none";
+            label.innerText = "Sederhana";
+            arrow.innerText = "⌵";
+        } else {
+            panel.style.display = "grid";
+            label.innerText = "Ilmiah";
+            arrow.innerText = "⌃";
         }
     }
 
     function toggleTheme() {
         document.body.classList.toggle('dark-mode');
-        let icon = document.getElementById('theme-icon');
-        icon.innerText = document.body.classList.contains('dark-mode') ? "☀️" : "🌙";
+        document.getElementById('theme-icon').innerText = document.body.classList.contains('dark-mode') ? "☀️" : "🌙";
     }
 </script>
 </body>
