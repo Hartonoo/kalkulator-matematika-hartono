@@ -6,31 +6,25 @@
     <title>Kalkulator Hartono</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        
-        .calc { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); width: 100%; max-width: 360px; position: relative; }
-        
-        /* Header: Mode & Settings */
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: 0.3s; }
+        .dark-mode { background: #0f172a; }
+        .calc { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); width: 100%; max-width: 360px; transition: 0.3s; }
+        .dark-mode .calc { background: #1e293b; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .header-tools { display: flex; justify-content: space-between; align-items: center; color: #94a3b8; margin-bottom: 30px; }
-        .mode-text { text-align: center; font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; }
-
+        .mode-text { text-align: center; font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; cursor: pointer; }
         .display { text-align: right; margin-bottom: 25px; padding: 10px; min-height: 100px; display: flex; flex-direction: column; justify-content: flex-end; }
         #history-text { font-size: 1rem; color: #cbd5e1; min-height: 1.5rem; }
-        #main-val { font-size: 3rem; font-weight: 700; color: #1e293b; }
-
+        #main-val { font-size: 2.5rem; font-weight: 700; color: #1e293b; }
+        .dark-mode #main-val { color: #f1f5f9; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        
         button { border: none; padding: 18px 0; border-radius: 18px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f8fafc; color: #475569; }
-        button:active { transform: scale(0.95); background: #f1f5f9; }
-        
-        /* Warna Spesifik */
+        .dark-mode button { background: #334155; color: #cbd5e1; }
+        button:active { transform: scale(0.95); }
         .btn-sci { color: #6366f1; background: #f1f5f9; }
+        .dark-mode .btn-sci { background: #1e1b4b; color: #818cf8; }
         .btn-op { background: #10b981; color: white; }
-        .btn-op-light { color: #10b981; background: #f0fdf4; }
         .btn-ac { color: #ef4444; background: #fef2f2; }
-        .btn-eq { background: #3b82f6 !important; color: white !important; grid-column: span 2; border-radius: 20px; }
-
-        /* Icon Simbol */
+        .btn-eq { background: #3b82f6 !important; color: white !important; grid-column: span 2; }
         .icon { cursor: pointer; font-size: 1.2rem; }
     </style>
 </head>
@@ -38,78 +32,114 @@
 
 <div class="calc">
     <div class="header-tools">
-        <span class="icon">🌙</span>
+        <span class="icon" onclick="toggleTheme()" id="theme-icon">🌙</span>
         <div>
-            <span class="icon" style="margin-right: 15px;">🕒</span>
-            <span class="icon">⚙️</span>
+            <span class="icon" style="margin-right: 15px;" onclick="alert('Fitur riwayat segera hadir!')">🕒</span>
+            <span class="icon" onclick="alert('Pengaturan dibuka')">⚙️</span>
         </div>
     </div>
 
-    <div class="mode-text">
+    <div class="mode-text" onclick="alert('Mode Ilmiah Aktif')">
         Sederhana
         <div style="font-size: 0.8rem;">⌵</div>
     </div>
 
     <div class="display">
-        <div id="history-text">{{ a1 }} {{ ops }} {{ a2 }}</div>
-        <div id="main-val">{{ hasil if hasil != "" else (a1 if a1 != "" else "0") }}</div>
+        <div id="history-text"></div>
+        <div id="main-val">0</div>
     </div>
 
-    <form method="POST">
-        <input type="hidden" name="a1" id="h1" value="{{ a1 }}">
-        <input type="hidden" name="a2" id="h2" value="{{ a2 }}">
-        <input type="hidden" name="ops" id="h_op" value="{{ ops }}">
+    <div class="grid">
+        <button class="btn-sci" onclick="sci('Math.sin(')">sin</button>
+        <button class="btn-sci" onclick="sci('Math.cos(')">cos</button>
+        <button class="btn-sci" onclick="sci('Math.tan(')">tan</button>
+        <button class="btn-sci" onclick="sci('Math.sqrt(')">√</button>
+        <button class="btn-sci" onclick="sci('Math.log10(')">log</button>
+        <button class="btn-sci" onclick="press('**')">xʸ</button>
+        <button class="btn-sci" onclick="press('Math.PI')">π</button>
+        <button class="btn-sci" onclick="press('Math.E')">e</button>
 
-        <div class="grid">
-            <button type="button" class="btn-sci" onclick="press('sin(')">sin</button>
-            <button type="button" class="btn-sci" onclick="press('cos(')">cos</button>
-            <button type="button" class="btn-sci" onclick="press('tan(')">tan</button>
-            <button type="button" class="btn-sci" onclick="press('sqrt(')">√</button>
-            <button type="button" class="btn-sci" onclick="press('log(')">log</button>
-            <button type="button" class="btn-sci" onclick="press('**')">xʸ</button>
-            <button type="button" class="btn-sci" onclick="press('3.14')">π</button>
-            <button type="button" class="btn-sci" onclick="press('2.71')">e</button>
-
-            <button type="button" class="btn-ac" onclick="window.location.href='/'">AC</button>
-            <button type="button" class="btn-op-light" onclick="press('DEL')">⌫</button>
-            <button type="button" class="btn-op-light" onclick="setOp('%')">%</button>
-            <button type="button" class="btn-op" onclick="setOp('/')">÷</button>
-            
-            <button type="button" onclick="press('7')">7</button>
-            <button type="button" onclick="press('8')">8</button>
-            <button type="button" onclick="press('9')">9</button>
-            <button type="button" class="btn-op" onclick="setOp('*')">×</button>
-            
-            <button type="button" onclick="press('4')">4</button>
-            <button type="button" onclick="press('5')">5</button>
-            <button type="button" onclick="press('6')">6</button>
-            <button type="button" class="btn-op" onclick="setOp('-')">-</button>
-            
-            <button type="button" onclick="press('1')">1</button>
-            <button type="button" onclick="press('2')">2</button>
-            <button type="button" onclick="press('3')">3</button>
-            <button type="button" class="btn-op" onclick="setOp('+')">+</button>
-            
-            <button type="button" onclick="press('0')">0</button>
-            <button type="button" onclick="press('.')">.</button>
-            <button type="submit" class="btn-eq">=</button>
-        </div>
-    </form>
+        <button class="btn-ac" onclick="clearAll()">AC</button>
+        <button onclick="del()">⌫</button>
+        <button onclick="press('%')">%</button>
+        <button class="btn-op" onclick="press('/')">÷</button>
+        
+        <button onclick="press('7')">7</button>
+        <button onclick="press('8')">8</button>
+        <button onclick="press('9')">9</button>
+        <button class="btn-op" onclick="press('*')">×</button>
+        
+        <button onclick="press('4')">4</button>
+        <button onclick="press('5')">5</button>
+        <button onclick="press('6')">6</button>
+        <button class="btn-op" onclick="press('-')">-</button>
+        
+        <button onclick="press('1')">1</button>
+        <button onclick="press('2')">2</button>
+        <button onclick="press('3')">3</button>
+        <button class="btn-op" onclick="press('+')">+</button>
+        
+        <button onclick="press('0')">0</button>
+        <button onclick="press('.')">.</button>
+        <button class="btn-eq" onclick="calculate()">=</button>
+    </div>
 </div>
 
 <script>
-    let cur = "";
+    let currentInput = "";
+    let display = document.getElementById('main-val');
+    let history = document.getElementById('history-text');
+
     function press(v) {
-        if(v === 'DEL') cur = cur.slice(0,-1);
-        else cur += v;
-        document.getElementById('main-val').innerText = cur || "0";
-        if (!document.getElementById('h_op').value) document.getElementById('h1').value = cur;
-        else document.getElementById('h2').value = cur;
+        if (currentInput === "0") currentInput = "";
+        currentInput += v;
+        updateDisplay();
     }
-    function setOp(op) {
-        document.getElementById('h_op').value = op;
-        document.getElementById('history-text').innerText = document.getElementById('h1').value + " " + op;
-        cur = "";
+
+    function sci(func) {
+        currentInput += func;
+        updateDisplay();
+    }
+
+    function clearAll() {
+        currentInput = "0";
+        history.innerText = "";
+        updateDisplay();
+    }
+
+    function del() {
+        currentInput = currentInput.slice(0, -1) || "0";
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        // Membersihkan tampilan agar Math.PI terlihat seperti simbol
+        let cleanText = currentInput.replace(/Math.PI/g, 'π').replace(/Math.E/g, 'e').replace(/Math\./g, '');
+        display.innerText = cleanText || "0";
+    }
+
+    function calculate() {
+        try {
+            history.innerText = display.innerText + " =";
+            // Memastikan kurung tutup untuk fungsi ilmiah
+            let expression = currentInput;
+            let openBrackets = (expression.match(/\(/g) || []).length;
+            let closeBrackets = (expression.match(/\)/g) || []).length;
+            for(let i=0; i < (openBrackets - closeBrackets); i++) expression += ")";
+            
+            let result = eval(expression);
+            currentInput = result.toString();
+            display.innerText = result;
+        } catch (e) {
+            display.innerText = "Error";
+            currentInput = "";
+        }
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        let icon = document.getElementById('theme-icon');
+        icon.innerText = document.body.classList.contains('dark-mode') ? "☀️" : "🌙";
     }
 </script>
 </body>
