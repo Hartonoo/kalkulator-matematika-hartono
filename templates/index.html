@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Pro Hartono</title>
+    <title>Kalkulator Ilmiah Hartono</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: 0.3s; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: 0.3s; }
         .dark-mode { background: #0f172a; }
-        .calc { background: white; padding: 25px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); width: 100%; max-width: 360px; transition: 0.3s; }
+        .calc { background: white; padding: 25px; border-radius: 35px; width: 100%; max-width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); transition: 0.3s; }
         .dark-mode .calc { background: #1e293b; color: white; }
-        .header-tools { display: flex; justify-content: space-between; align-items: center; color: #94a3b8; margin-bottom: 20px; }
-        .mode-text { text-align: center; font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-bottom: 15px; cursor: pointer; text-transform: uppercase; }
-        .display { text-align: right; margin-bottom: 25px; padding: 10px; min-height: 100px; display: flex; flex-direction: column; justify-content: flex-end; }
-        #main-val { font-size: 2.5rem; font-weight: 700; color: #1e293b; word-wrap: break-word; }
+        .header-tools { display: flex; justify-content: space-between; margin-bottom: 20px; color: #94a3b8; }
+        .mode-text { text-align: center; font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-bottom: 10px; cursor: pointer; text-transform: uppercase; }
+        .display { text-align: right; margin-bottom: 20px; padding: 10px; min-height: 120px; display: flex; flex-direction: column; justify-content: flex-end; }
+        #main-val { font-size: 2.5rem; font-weight: 700; color: #1e293b; word-wrap: break-word; overflow-wrap: break-word; }
         .dark-mode #main-val { color: #f1f5f9; }
         #sci-panel { display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
@@ -71,23 +71,32 @@
 </div>
 
 <script>
-    let input = "";
+    let currentInput = "";
     const display = document.getElementById('main-val');
 
-    function press(v) { input += v; render(); }
-    function clearAll() { input = ""; render(); }
-    function del() { input = input.slice(0, -1); render(); }
-    function render() { display.innerText = input || "0"; }
+    function press(v) { 
+        currentInput += v; 
+        updateDisplay(); 
+    }
+
+    function updateDisplay() {
+        display.innerText = currentInput || "0";
+    }
+
+    function clearAll() { currentInput = ""; updateDisplay(); }
+    function del() { currentInput = currentInput.slice(0, -1); updateDisplay(); }
 
     function calculate() {
         try {
-            // Menghitung otomatis dengan Math.js
-            let res = math.evaluate(input);
-            input = math.format(res, {precision: 10}).toString();
-            render();
+            // Bagian kunci: Menggunakan math.evaluate untuk menghitung otomatis
+            let result = math.evaluate(currentInput);
+            
+            // Membatasi desimal agar tidak meluber
+            currentInput = math.format(result, {precision: 10}).toString();
+            updateDisplay();
         } catch (e) {
             display.innerText = "Error";
-            input = "";
+            currentInput = "";
         }
     }
 
