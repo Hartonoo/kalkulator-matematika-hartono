@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Pro Hartono</title>
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #1a202c;
+            --btn-bg: #f1f3f4;
+            --btn-text: #1a202c;
+            --green: #00c07f;
+            --blue: #4d90fe;
+            --shadow: rgba(0,0,0,0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #ffffff;
+            --btn-bg: #2d2d2d;
+            --btn-text: #ffffff;
+            --shadow: rgba(0,0,0,0.4);
+        }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            transition: 0.4s;
+        }
+        
+        .calc { 
+            background: var(--card); 
+            width: 360px; 
+            padding: 25px; 
+            border-radius: 40px; 
+            box-shadow: 0 20px 60px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-tools {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+        }
+
+        .tool-icon {
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.6;
+        }
+
+        .display { 
+            text-align: right; 
+            margin: 40px 0 20px 0;
+            padding: 0 10px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+        }
+
+        #history-label { 
+            color: #a0aec0; 
+            font-size: 1.1rem; 
+            margin-bottom: 8px; 
+            word-wrap: break-word;
+            max-width: 100%;
+            min-height: 1.2rem;
+        }
+
+        #main-val { 
+            font-size: 3.5rem; 
+            font-weight: 800; 
+            word-wrap: break-word; 
+            word-break: break-all; 
+            line-height: 1.1;
+            margin: 0;
+            width: 100%;
+        }
+
+        .toggle-sci { text-align: center; color: var(--blue); cursor: pointer; font-size: 0.8rem; margin-bottom: 20px; font-weight: bold; }
+        
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        #sci-section { display: none; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
+        
+        .btn { 
+            padding: 20px; 
+            border: none; 
+            border-radius: 22px; 
+            font-size: 1.2rem; 
+            cursor: pointer; 
+            background: var(--btn-bg); 
+            color: var(--btn-text); 
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn:active { transform: scale(0.92); }
+        .btn-op { color: var(--green); background: rgba(0, 192, 127, 0.08); }
+        .btn-eq { background: var(--blue); color: white; grid-column: span 2; }
+
+        #history-modal {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--card);
+            z-index: 10;
+            padding: 30px;
+            box-sizing: border-box;
+            border-radius: 40px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+<div class="calc">
+    <div id="history-modal">
+        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
+            <h3 style="margin:0">Riwayat</h3>
+            <span class="tool-icon" onclick="closeHistory()">✕</span>
+        </div>
+        <div id="history-list"></div>
+    </div>
+
+    <div class="header-tools">
+        <div class="tool-icon" onclick="toggleTheme()" id="theme-icon">🌙</div>
+        <div style="display: flex; gap: 15px;">
+            <div class="tool-icon" onclick="openHistory()">🕒</div>
+            <div class="tool-icon">⚙️</div>
+        </div>
+    </div>
+
+    <div class="display">
+        <div id="history-label">{% if a1 %}{{ a1 }} {{ ops if ops }}{% endif %}</div>
+        <div id="main-val">{% if hasil is not none %}{{ hasil }}{% else %}{{ a2 if a2 else '0' }}{% endif %}</div>
+    </div>
+
+    <div class="toggle-sci" onclick="toggleSci()">ILMIAH ▾</div>
+
+    <form method="POST" id="form">
+        <input type="hidden" name="angka1" id="h1">
+        <input type="hidden" name="angka2" id="h2">
+        <input type="hidden" name="operasi" id="h_op">
+
+        <div id="sci-section">
+            <button type="button" class="btn" onclick="sendSci('sin')">sin</button>
+            <button type="button" class="btn" onclick="sendSci('cos')">cos</button>
+            <button type="button" class="btn" onclick="sendSci('tan')">tan</button>
+            <button type="button" class="btn" onclick="sendSci('akar')">√</button>
+            <button type="button" class="btn" onclick="sendSci('log')">log</button>
+            <button type="button" class="btn" onclick="setOps('pangkat')">xʸ</button>
+            <button type="button" class="btn" onclick="press('3.14159')">π</button>
+            <button type="button" class="btn" onclick="press('2.71828')">e</button>
+        </div>
+
+        <div class="grid">
+            <button type="button" class="btn btn-op" onclick="resetAll()">AC</button>
+            <button type="button" class="btn btn-op" onclick="del()">⌫</button>
+            <button type="button" class="btn btn-op" onclick="setOps('persen')">%</button>
+            <button type="button" class="btn btn-op" onclick="setOps('bagi')">÷</button>
+            <button type="button" class="btn" onclick="press('7')">7</button>
+            <button type="button" class="btn" onclick="press('8')">8</button>
+            <button type="button" class="btn" onclick="press('9')">9</button>
+            <button type="button" class="btn btn-op" onclick="setOps('kali')">×</button>
+            <button type="button" class="btn" onclick="press('4')">4</button>
+            <button type="button" class="btn" onclick="press('5')">5</button>
+            <button type="button" class="btn" onclick="press('6')">6</button>
+            <button type="button" class="btn btn-op" onclick="setOps('kurang')">-</button>
+            <button type="button" class="btn" onclick="press('1')">1</button>
+            <button type="button" class="btn" onclick="press('2')">2</button>
+            <button type="button" class="btn" onclick="press('3')">3</button>
+            <button type="button" class="btn btn-op" onclick="setOps('tambah')">+</button>
+            <button type="button" class="btn" onclick="press('0')">0</button>
+            <button type="button" class="btn" onclick="press('.')">.</button>
+            <button type="submit" class="btn btn-eq">=</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    let cur = "";
+    let isWait = false;
+    let operatorSimbol = "";
+
+    function toggleTheme() {
+        const b = document.body;
+        const i = document.getElementById('theme-icon');
+        const mode = b.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        b.setAttribute('data-theme', mode);
+        i.innerText = mode === 'dark' ? '☀️' : '🌙';
+        localStorage.setItem('theme', mode);
+    }
+    if(localStorage.getItem('theme') === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').innerText = '☀️';
+    }
+
+    function openHistory() {
+        const logs = JSON.parse(localStorage.getItem('logs') || "[]");
+        document.getElementById('history-list').innerHTML = logs.map(l => `<div style="padding:10px 0; border-bottom:1px solid #eee;">${l}</div>`).join('') || "Kosong";
+        document.getElementById('history-modal').style.display = 'block';
+    }
+    function closeHistory() { document.getElementById('history-modal').style.display = 'none'; }
+
+    function press(n) {
+        if (isWait) { 
+            cur = n; 
+            isWait = false; 
+        } else { 
+            cur += n; 
+        }
+        document.getElementById('main-val').innerText = cur;
+        
+        let angka1 = document.getElementById('h1').value;
+        if (angka1 && operatorSimbol) {
+            document.getElementById('history-label').innerText = angka1 + " " + operatorSimbol + " " + cur;
+        }
+    }
+
+    function setOps(op) {
+        if (cur === "") return;
+        document.getElementById('h1').value = cur;
+        document.getElementById('h_op').value = op;
+        
+        // Perbaikan logika simbol
+        if(op === 'tambah') operatorSimbol = '+';
+        else if(op === 'kurang') operatorSimbol = '-';
+        else if(op === 'kali') operatorSimbol = '×';
+        else if(op === 'bagi') operatorSimbol = '÷';
+        else if(op === 'pangkat') operatorSimbol = '^';
+        else if(op === 'persen') operatorSimbol = '%';
+        
+        document.getElementById('history-label').innerText = cur + " " + operatorSimbol;
+        isWait = true;
+    }
+
+    function sendSci(op) {
+        // Tombol ilmiah sekarang berfungsi mengirim data ke Flask
+        if (cur === "") return;
+        document.getElementById('h1').value = cur;
+        document.getElementById('h_op').value = op;
+        document.getElementById('form').submit();
+    }
+
+    function resetAll() {
+        cur = "";
+        operatorSimbol = "";
+        document.getElementById('h1').value = "";
+        document.getElementById('main-val').innerText = "0";
+        document.getElementById('history-label').innerText = "";
+    }
+
+    function del() {
+        cur = cur.toString().slice(0, -1);
+        document.getElementById('main-val').innerText = cur || "0";
+    }
+
+    function toggleSci() {
+        const s = document.getElementById('sci-section');
+        s.style.display = (s.style.display === "none" || s.style.display === "") ? "grid" : "none";
+    }
+
+    document.getElementById('form').onsubmit = () => {
+        document.getElementById('h2').value = cur;
+        const h = document.getElementById('history-label').innerText;
+        const res = document.getElementById('main-val').innerText;
+        if(h && res) {
+            let logs = JSON.parse(localStorage.getItem('logs') || "[]");
+            logs.unshift(h + " = " + res);
+            localStorage.setItem('logs', JSON.stringify(logs.slice(0,10)));
+        }
+    };
+</script>
+</body>
+</html>
