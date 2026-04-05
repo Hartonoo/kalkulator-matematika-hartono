@@ -11,10 +11,7 @@
         .calc { background: white; padding: 25px; border-radius: 35px; width: 100%; max-width: 360px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
         .mode-text { text-align: center; font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-bottom: 10px; cursor: pointer; text-transform: uppercase; }
         .display { text-align: right; margin-bottom: 20px; padding: 10px; min-height: 120px; display: flex; flex-direction: column; justify-content: flex-end; }
-        #main-val { 
-            font-size: 2.2rem; font-weight: 700; color: #1e293b; 
-            word-wrap: break-word; overflow-wrap: break-word; /* Mencegah angka meluber keluar */
-        }
+        #main-val { font-size: 2.2rem; font-weight: 700; color: #1e293b; word-wrap: break-word; overflow-wrap: break-word; }
         #sci-panel { display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         button { border: none; padding: 18px 0; border-radius: 18px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f8fafc; color: #475569; }
@@ -76,7 +73,7 @@
     }
 
     function render() {
-        // Mengubah kode teks menjadi simbol yang cantik di layar
+        // Tampilan simbol rapi di layar
         let viewText = currentInput.replace(/pi/g, 'π').replace(/sqrt\(/g, '√(').replace(/log10\(/g, 'log(');
         display.innerText = viewText || "0";
     }
@@ -88,7 +85,7 @@
         try {
             if (!currentInput) return;
 
-            // PERBAIKAN OTOMATIS: Menambah kurung tutup jika Hartono lupa menekannya
+            // Menutup kurung otomatis jika kamu lupa menekan tombol ")"
             let checkInput = currentInput;
             const openBrackets = (checkInput.match(/\(/g) || []).length;
             const closeBrackets = (checkInput.match(/\)/g) || []).length;
@@ -96,14 +93,14 @@
                 checkInput += ")";
             }
 
-            // HITUNG OTOMATIS: Menggunakan fungsi math.evaluate dari Math.js
+            // PROSES HITUNG OTOMATIS: Memanggil Math.js
             let result = math.evaluate(checkInput);
             
-            // Format angka agar tetap di dalam kotak (maks 10 desimal)
+            // Format angka hasil agar pas di layar (max 10 angka di belakang koma)
             currentInput = math.format(result, {precision: 10}).toString();
             render();
         } catch (e) {
-            display.innerText = "Format Salah";
+            display.innerText = "Gagal Hitung";
             setTimeout(() => render(), 1500);
         }
     }
