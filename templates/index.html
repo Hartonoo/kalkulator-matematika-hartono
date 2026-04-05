@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Ilmiah Hartono</title>
+    <title>Kalkulator Ilmiah Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,7 +32,7 @@
 <div class="calc">
     <div class="header-tools">
         <span class="icon" onclick="toggleTheme()" id="theme-icon">🌙</span>
-        <div class="icon">🕒 ⚙️</div>
+        <div class="icon" onclick="alert('Riwayat belum tersedia')">🕒 ⚙️</div>
     </div>
 
     <div class="mode-text" onclick="toggleSci()">
@@ -59,12 +59,16 @@
         <button onclick="del()">⌫</button>
         <button onclick="press('%')">%</button>
         <button class="btn-op" onclick="press('/')">÷</button>
+        
         <button onclick="press('7')">7</button><button onclick="press('8')">8</button><button onclick="press('9')">9</button>
         <button class="btn-op" onclick="press('*')">×</button>
+        
         <button onclick="press('4')">4</button><button onclick="press('5')">5</button><button onclick="press('6')">6</button>
         <button class="btn-op" onclick="press('-')">-</button>
+        
         <button onclick="press('1')">1</button><button onclick="press('2')">2</button><button onclick="press('3')">3</button>
         <button class="btn-op" onclick="press('+')">+</button>
+        
         <button onclick="press('0')">0</button><button onclick="press('.')">.</button>
         <button class="btn-eq" onclick="calculate()">=</button>
     </div>
@@ -74,13 +78,15 @@
     let currentInput = "";
     const display = document.getElementById('main-val');
 
-    function press(v) { 
-        currentInput += v; 
-        updateDisplay(); 
+    function press(v) {
+        currentInput += v;
+        updateDisplay();
     }
 
     function updateDisplay() {
-        display.innerText = currentInput || "0";
+        // Membersihkan tampilan agar simbol terlihat rapi
+        let viewText = currentInput.replace(/pi/g, 'π').replace(/sqrt\(/g, '√(').replace(/log10\(/g, 'log(');
+        display.innerText = viewText || "0";
     }
 
     function clearAll() { currentInput = ""; updateDisplay(); }
@@ -88,10 +94,10 @@
 
     function calculate() {
         try {
-            // Bagian kunci: Menggunakan math.evaluate untuk menghitung otomatis
+            // Menghitung otomatis menggunakan Math.js
             let result = math.evaluate(currentInput);
             
-            // Membatasi desimal agar tidak meluber
+            // Format hasil agar tidak terlalu panjang dan meluber
             currentInput = math.format(result, {precision: 10}).toString();
             updateDisplay();
         } catch (e) {
