@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Instan Hartono</title>
+    <title>Kalkulator Lengkap Hartono</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .calc { background: white; padding: 25px; border-radius: 40px; width: 100%; max-width: 360px; box-shadow: 0 25px 50px rgba(0,0,0,0.1); }
+        .calc { background: white; padding: 25px; border-radius: 40px; width: 100%; max-width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.1); }
         .display { text-align: right; padding: 20px; min-height: 140px; display: flex; flex-direction: column; justify-content: flex-end; }
         #history { font-size: 1.1rem; color: #94a3b8; min-height: 1.5rem; margin-bottom: 5px; }
         #result { font-size: 3rem; font-weight: 700; color: #1e293b; overflow: hidden; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        button { border: none; padding: 18px 0; border-radius: 20px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f1f5f9; }
+        
+        /* Grid 4 kolom agar semua tombol muat */
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        
+        button { border: none; padding: 18px 0; border-radius: 20px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: #f1f5f9; color: #334155; }
         .btn-sci { color: #6366f1; background: #eef2ff; }
         .btn-op { background: #10b981; color: white; }
         .btn-ac { color: #ef4444; background: #fff1f2; }
-        .btn-eq { background: #3b82f6; color: white; grid-column: span 2; }
+        .btn-eq { background: #3b82f6; color: white; }
+        
         button:active { transform: scale(0.95); }
     </style>
 </head>
@@ -35,6 +39,11 @@
         <button class="btn-sci" onclick="instantSci('tan')">tan</button>
         <button class="btn-sci" onclick="instantSci('sqrt')">√</button>
 
+        <button class="btn-sci" onclick="instantSci('log10')">log</button>
+        <button class="btn-sci" onclick="press('^')">xʸ</button>
+        <button class="btn-sci" onclick="press('pi')">π</button>
+        <button class="btn-sci" onclick="press('e')">e</button>
+
         <button class="btn-ac" onclick="clearAll()">AC</button>
         <button onclick="del()">⌫</button>
         <button onclick="press('%')">%</button>
@@ -51,7 +60,7 @@
         
         <button onclick="press('0')">0</button>
         <button onclick="press('.')">.</button>
-        <button class="btn-eq" onclick="calculate()">=</button>
+        <button class="btn-eq" style="grid-column: span 2;" onclick="calculate()">=</button>
     </div>
 </div>
 
@@ -66,7 +75,9 @@
     }
 
     function render() {
-        resDiv.innerText = currentInput || "0";
+        // Tampilan simbol yang lebih rapi
+        let view = currentInput.replace(/\*/g, '×').replace(/\//g, '÷').replace(/pi/g, 'π');
+        resDiv.innerText = view || "0";
     }
 
     function clearAll() {
@@ -80,20 +91,14 @@
         render();
     }
 
-    // FUNGSI UTAMA: Klik sin/cos langsung hitung dari angka di layar
+    // Fungsi otomatis untuk sin, cos, tan, log, sqrt
     function instantSci(type) {
         if (!currentInput) return;
-        
         try {
-            // Mengambil angka saat ini dan menghitungnya langsung
             let val = math.evaluate(currentInput);
-            let formula = `${type}(${val})`;
-            let result = math.evaluate(formula);
+            let result = math.evaluate(`${type}(${val})`);
             
-            // Tampilkan proses di riwayat (angka kecil)
             histDiv.innerText = `${type}(${currentInput})`;
-            
-            // Tampilkan hasil di angka besar (otomatis)
             currentInput = math.format(result, {precision: 10}).toString();
             render();
         } catch (e) {
