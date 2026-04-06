@@ -8,64 +8,184 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        :root { --bg-body: #f1f5f9; --bg-calc: white; --text-main: #1e293b; --text-muted: #94a3b8; --bg-btn: #f8fafc; }
-        .dark-mode { --bg-body: #0f172a; --bg-calc: #1e293b; --text-main: #f1f5f9; --text-muted: #64748b; --bg-btn: #334155; }
+        
+        :root {
+            --bg-body: #f1f5f9;
+            --bg-calc: white;
+            --text-main: #1e293b;
+            --text-muted: #94a3b8;
+            --bg-btn: #f8fafc;
+        }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-body); display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: 0.3s; }
-        .calc { background: var(--bg-calc); padding: 20px; border-radius: 40px; width: 100%; max-width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.1); position: relative; transition: 0.3s; }
+        .dark-mode {
+            --bg-body: #0f172a;
+            --bg-calc: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #64748b;
+            --bg-btn: #334155;
+        }
 
-        .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px; color: var(--text-muted); font-size: 1.2rem; }
-        .header-bar i { cursor: pointer; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg-body); 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; transition: 0.3s;
+        }
+        
+        .calc { 
+            background: var(--bg-calc); padding: 20px; border-radius: 40px; 
+            width: 100%; max-width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.1); 
+            position: relative; transition: 0.3s;
+        }
 
-        .display { text-align: right; padding: 20px; min-height: 160px; display: flex; flex-direction: column; justify-content: flex-end; }
+        /* PERBAIKAN HEADER: Ikon Sejajar dan Rapi */
+        .header-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px 15px 5px 15px; 
+            color: var(--text-muted); 
+        }
+
+        .header-right {
+            display: flex;
+            gap: 20px; /* Jarak pas antar ikon jam dan gigi roda */
+            align-items: center;
+        }
+
+        .header-bar i { 
+            cursor: pointer; 
+            font-size: 1.3rem; 
+            transition: 0.2s;
+            padding: 5px;
+        }
+        
+        .header-bar i:hover { color: #3b82f6; }
+
+        .display { 
+            text-align: right; padding: 20px; min-height: 160px; 
+            display: flex; flex-direction: column; justify-content: flex-end;
+            overflow: hidden;
+        }
+
         #history { font-size: 1rem; color: var(--text-muted); min-height: 1.5rem; margin-bottom: 5px; }
-        #result { font-size: 3.2rem; font-weight: 700; color: var(--text-main); line-height: 1.1; transition: font-size 0.2s; }
+        
+        #result { 
+            font-size: 3.2rem; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            line-height: 1.1; 
+            transition: font-size 0.2s;
+            word-break: break-all; /* Perbaikan agar angka panjang tidak berantakan */
+            max-height: 150px;
+            overflow-y: auto;
+        }
 
-        .mode-container { text-align: center; color: var(--text-muted); margin-bottom: 15px; cursor: pointer; user-select: none; }
+        .mode-container { 
+            text-align: center; color: var(--text-muted); 
+            margin-bottom: 15px; cursor: pointer; user-select: none;
+        }
         .mode-container span { font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; display: block; }
         
-        /* TRANSISI LEMBUT DISINI */
+        /* TRANSISI LEMBUT MENU ILMIAH */
         #sci-keys { 
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
             overflow: hidden;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             max-height: 250px; opacity: 1; margin-bottom: 12px;
         }
-        #sci-keys.hidden { max-height: 0; margin-bottom: 0; opacity: 0; transform: scaleY(0.95); pointer-events: none; }
+        #sci-keys.hidden { max-height: 0; margin-bottom: 0; opacity: 0; transform: scaleY(0.9); pointer-events: none; }
 
         .mode-container i { transition: transform 0.5s ease; }
         .mode-container.active i { transform: rotate(180deg); }
 
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        button { border: none; padding: 18px 0; border-radius: 20px; font-size: 1.1rem; font-weight: 600; cursor: pointer; background: var(--bg-btn); color: var(--text-main); transition: 0.2s; }
+
+        button { 
+            border: none; padding: 18px 0; border-radius: 20px; 
+            font-size: 1.1rem; font-weight: 600; cursor: pointer; 
+            background: var(--bg-btn); color: var(--text-main); transition: 0.2s;
+        }
+
         .btn-sci { color: #6366f1; background: #eef2ff; }
         .btn-op { background: #10b981; color: white; }
         .btn-ac { color: #ef4444; background: #fff1f2; }
         .btn-eq { background: #3b82f6; color: white; grid-column: span 2; }
+        
         button:active { transform: scale(0.95); }
 
-        #history-modal { display: none; position: absolute; top: 60px; right: 20px; background: var(--bg-calc); border: 1px solid var(--text-muted); padding: 15px; border-radius: 15px; z-index: 100; width: 220px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); color: var(--text-main); }
+        /* MODAL RIWAYAT */
+        #history-modal { 
+            display: none; position: absolute; top: 70px; right: 20px; 
+            background: var(--bg-calc); border: 1px solid var(--text-muted); 
+            padding: 15px; border-radius: 15px; z-index: 100; width: 250px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); color: var(--text-main); 
+        }
+        .hist-item { 
+            padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; 
+            transition: 0.2s; border-radius: 8px; margin-bottom: 5px;
+        }
+        .hist-item:hover { background: #f1f5f9; color: #3b82f6; }
+        .dark-mode .hist-item:hover { background: #334155; }
     </style>
 </head>
 <body>
 
 <div class="calc">
-    <div id="history-modal"><p style="font-size: 0.8rem; margin-bottom: 8px; border-bottom: 1px solid; padding-bottom: 4px;">Riwayat:</p><div id="history-list" style="font-size: 0.75rem; max-height: 150px; overflow-y: auto;">Belum ada data.</div></div>
+    <div id="history-modal">
+        <p style="font-size: 0.8rem; margin-bottom: 8px; font-weight: bold; border-bottom: 1px solid; padding-bottom: 4px;">Klik hasil untuk menyalin:</p>
+        <div id="history-list" style="font-size: 0.8rem; max-height: 200px; overflow-y: auto;">Belum ada data.</div>
+    </div>
+
     <div class="header-bar">
-        <div class="header-left"><i class="fa-regular fa-moon" id="theme-btn" onclick="toggleDarkMode()"></i></div>
-        <div class="header-right"><i class="fa-solid fa-clock-rotate-left" onclick="toggleHistory()"></i><i class="fa-solid fa-gear" onclick="alert('Presisi 10 digit aktif.')"></i></div>
+        <div class="header-left">
+            <i class="fa-regular fa-moon" id="theme-btn" onclick="toggleDarkMode()"></i>
+        </div>
+        <div class="header-right">
+            <i class="fa-solid fa-clock-rotate-left" onclick="toggleHistory()"></i>
+            <i class="fa-solid fa-gear" onclick="alert('Presisi: 10 digit aktif.')"></i>
+        </div>
     </div>
-    <div class="display"><div id="history"></div><div id="result">0</div></div>
-    <div class="mode-container" onclick="toggleScientific()"><span>ILMIAH</span><i class="fa-solid fa-chevron-up"></i></div>
-    <div id="sci-keys" class="hidden"> <button class="btn-sci" onclick="instantSci('sin')">sin</button><button class="btn-sci" onclick="instantSci('cos')">cos</button><button class="btn-sci" onclick="instantSci('tan')">tan</button><button class="btn-sci" onclick="instantSci('sqrt')">√</button>
-        <button class="btn-sci" onclick="instantSci('log10')">log</button><button class="btn-sci" onclick="press('^')">xʸ</button><button class="btn-sci" onclick="press('pi')">π</button><button class="btn-sci" onclick="press('e')">e</button>
+
+    <div class="display">
+        <div id="history"></div>
+        <div id="result">0</div>
     </div>
+
+    <div class="mode-container" onclick="toggleScientific()">
+        <span>ILMIAH</span>
+        <i class="fa-solid fa-chevron-up"></i>
+    </div>
+
+    <div id="sci-keys" class="hidden">
+        <button class="btn-sci" onclick="instantSci('sin')">sin</button>
+        <button class="btn-sci" onclick="instantSci('cos')">cos</button>
+        <button class="btn-sci" onclick="instantSci('tan')">tan</button>
+        <button class="btn-sci" onclick="instantSci('sqrt')">√</button>
+        <button class="btn-sci" onclick="instantSci('log10')">log</button>
+        <button class="btn-sci" onclick="press('^')">xʸ</button>
+        <button class="btn-sci" onclick="press('pi')">π</button>
+        <button class="btn-sci" onclick="press('e')">e</button>
+    </div>
+
     <div class="grid">
-        <button class="btn-ac" onclick="clearAll()">AC</button><button onclick="del()"><i class="fa-solid fa-delete-left"></i></button><button onclick="press('%')">%</button><button class="btn-op" onclick="press('/')">÷</button>
-        <button onclick="press('7')">7</button><button onclick="press('8')">8</button><button onclick="press('9')">9</button><button class="btn-op" onclick="press('*')">×</button>
-        <button onclick="press('4')">4</button><button onclick="press('5')">5</button><button onclick="press('6')">6</button><button class="btn-op" onclick="press('-')">-</button>
-        <button onclick="press('1')">1</button><button onclick="press('2')">2</button><button onclick="press('3')">3</button><button class="btn-op" onclick="press('+')">+</button>
-        <button onclick="press('0')">0</button><button onclick="press('.')">.</button><button class="btn-eq" onclick="calculate()">=</button>
+        <button class="btn-ac" onclick="clearAll()">AC</button>
+        <button onclick="del()"><i class="fa-solid fa-delete-left"></i></button>
+        <button onclick="press('%')">%</button>
+        <button class="btn-op" onclick="press('/')">÷</button>
+        
+        <button onclick="press('7')">7</button><button onclick="press('8')">8</button><button onclick="press('9')">9</button>
+        <button class="btn-op" onclick="press('*')">×</button>
+        
+        <button onclick="press('4')">4</button><button onclick="press('5')">5</button><button onclick="press('6')">6</button>
+        <button class="btn-op" onclick="press('-')">-</button>
+        
+        <button onclick="press('1')">1</button><button onclick="press('2')">2</button><button onclick="press('3')">3</button>
+        <button class="btn-op" onclick="press('+')">+</button>
+        
+        <button onclick="press('0')">0</button>
+        <button onclick="press('.')">.</button>
+        <button class="btn-eq" onclick="calculate()">=</button>
     </div>
 </div>
 
@@ -93,10 +213,15 @@
         modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
     }
 
-    function addHistory(val) {
+    function addHistory(exp, res) {
         const item = document.createElement('div');
-        item.style.marginBottom = "5px";
-        item.innerText = val;
+        item.className = "hist-item";
+        item.innerHTML = `<small style="color:var(--text-muted)">${exp}</small><br><strong>${res}</strong>`;
+        item.onclick = () => {
+            currentInput = res.toString();
+            render();
+            toggleHistory();
+        };
         if(histList.innerText === "Belum ada data.") histList.innerText = "";
         histList.prepend(item);
     }
@@ -109,7 +234,9 @@
         let view = currentInput.replace(/\*/g, '×').replace(/\//g, '÷').replace(/pi/g, 'π');
         resDiv.innerText = view || "0";
         const len = resDiv.innerText.length;
-        resDiv.style.fontSize = len > 10 ? (len > 20 ? "1.5rem" : "2.2rem") : "3.2rem";
+        if (len <= 8) resDiv.style.fontSize = "3.2rem";
+        else if (len <= 14) resDiv.style.fontSize = "2.2rem";
+        else resDiv.style.fontSize = "1.5rem";
     }
 
     function instantSci(type) {
@@ -118,7 +245,7 @@
             let val = math.evaluate(currentInput);
             let result = math.evaluate(`${type}(${val})`);
             let formatted = math.format(result, {precision: 10}).toString();
-            addHistory(`${type}(${currentInput}) = ${formatted}`);
+            addHistory(`${type}(${currentInput})`, formatted);
             histDiv.innerText = `${type}(${currentInput})`;
             currentInput = formatted;
             render();
@@ -130,7 +257,7 @@
         try {
             let result = math.evaluate(currentInput);
             let formatted = math.format(result, {precision: 10}).toString();
-            addHistory(`${currentInput} = ${formatted}`);
+            addHistory(currentInput, formatted);
             histDiv.innerText = currentInput + " =";
             currentInput = formatted;
             render();
